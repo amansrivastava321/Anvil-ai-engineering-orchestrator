@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Engineering Organization</title>
+<style>
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --card:      #21262d;
+    --border:    #30363d;
+    --text:      #c9d1d9;
+    --muted:     #8b949e;
+    --blue:      #58a6ff;
+    --green:     #3fb950;
+    --orange:    #f0883e;
+    --purple:    #bc8cff;
+    --red:       #f85149;
+    --yellow:    #e3b341;
+
+    --mode1: var(--green);
+    --mode2: var(--blue);
+    --mode3: var(--orange);
+    --mode4: var(--purple);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Header ─────────────────────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo { font-size: 20px; }
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+  .status-dot.online  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.offline { background: var(--red); }
+
+  .refresh-timer {
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 80px;
+    text-align: right;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ── Stat Cards ─────────────────────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Panel ──────────────────────────────────────────────── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-body { padding: 20px; }
+
+  /* ── Ask the CEO ────────────────────────────────────────── */
+  .ask-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .form-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  input[type="text"], textarea, select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--blue);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .repo-field { flex: 0 0 220px; }
+
+  .prompt-field { flex: 1; }
+
+  button {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  button.secondary {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* ── CEO Response ───────────────────────────────────────── */
+  #ceo-response {
+    margin-top: 16px;
+    display: none;
+  }
+
+  .response-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .mode-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .mode-decide_alone        { background: rgba(63,185,80,.15);  color: var(--green); }
+  .mode-consult_experts     { background: rgba(88,166,255,.15); color: var(--blue); }
+  .mode-convene_council     { background: rgba(240,136,62,.15); color: var(--orange); }
+  .mode-strategic_initiative{ background: rgba(188,140,255,.15);color: var(--purple); }
+
+  .expert-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .confidence-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .bar-track {
+    width: 80px;
+    height: 6px;
+    background: var(--card);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+    transition: width 0.4s;
+  }
+
+  .duration-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .response-section-title {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 16px 0 8px;
+  }
+
+  .plan-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    white-space: pre-wrap;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
+    color: var(--text);
+  }
+
+  .reasoning-block {
+    background: var(--card);
+    border-left: 3px solid var(--blue);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── Recent Decisions ───────────────────────────────────── */
+  .decision-list { display: flex; flex-direction: column; }
+
+  .decision-item {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .decision-item:last-child { border-bottom: none; }
+  .decision-item:hover .decision-summary { background: rgba(88,166,255,.04); }
+
+  .decision-summary {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .decision-time {
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 55px;
+  }
+
+  .decision-desc {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .decision-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .decision-duration {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .outcome-icon { font-size: 14px; }
+
+  .decision-detail {
+    display: none;
+    padding: 0 20px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .decision-detail.open { display: block; }
+
+  .detail-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    padding-top: 12px;
+  }
+
+  .tab-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--text);
+    border-color: var(--blue);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── CEO Status ─────────────────────────────────────────── */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 768px) {
+    .status-grid { grid-template-columns: 1fr; }
+  }
+
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .status-row:last-child { border-bottom: none; }
+
+  .status-key { color: var(--muted); font-size: 13px; }
+  .status-val { color: var(--text); font-size: 13px; font-weight: 600; }
+
+  .mode-dist {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .mode-dist-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mode-dist-label {
+    font-size: 12px;
+    width: 110px;
+    flex-shrink: 0;
+  }
+
+  .mode-dist-track {
+    flex: 1;
+    height: 8px;
+    background: var(--card);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .mode-dist-fill { height: 100%; border-radius: 4px; }
+
+  .mode-dist-pct {
+    font-size: 12px;
+    color: var(--muted);
+    width: 36px;
+    text-align: right;
+  }
+
+  /* ── Loading / Spinner ──────────────────────────────────── */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .error-state {
+    background: rgba(248,81,73,.08);
+    border: 1px solid rgba(248,81,73,.3);
+    border-radius: 6px;
+    padding: 12px 16px;
+    color: var(--red);
+    font-size: 13px;
+  }
+
+  /* ── Scrollbars ─────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Repo Onboarding ─────────────────────────────────────── */
+  .pipeline-steps {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--card);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .pipeline-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+
+  .pipeline-step.done   { color: var(--green); border-color: var(--green); background: rgba(63,185,80,.08); }
+  .pipeline-step.active { color: var(--blue);  border-color: var(--blue);  background: rgba(88,166,255,.08); }
+  .pipeline-step.error  { color: var(--red);   border-color: var(--red);   background: rgba(248,81,73,.08); }
+
+  .pipeline-arrow { color: var(--muted); font-size: 12px; }
+
+  /* Health score badge */
+  .health-score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    border: 2px solid;
+    flex-shrink: 0;
+  }
+  .health-score.good   { border-color: var(--green); color: var(--green); }
+  .health-score.medium { border-color: var(--yellow); color: var(--yellow); }
+  .health-score.poor   { border-color: var(--red);   color: var(--red); }
+
+  /* Repo list items */
+  .repo-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .repo-item:last-child { border-bottom: none; }
+  .repo-item:hover { background: rgba(88,166,255,.03); }
+
+  .repo-info { flex: 1; min-width: 0; }
+  .repo-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .repo-path { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .repo-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .repo-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .repo-actions button { padding: 4px 12px; font-size: 12px; font-weight: 500; }
+
+  /* Issue badge */
+  .issue-count {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .issue-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .issue-badge.critical { background: rgba(248,81,73,.15);   color: var(--red); }
+  .issue-badge.high     { background: rgba(240,136,62,.15);  color: var(--orange); }
+  .issue-badge.medium   { background: rgba(227,179,65,.12);  color: var(--yellow); }
+
+  /* ── Folder browser ─────────────────────────────────────────── */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    background: rgba(255,255,255,.01);
+    user-select: none;
+  }
+  .drop-zone:hover { border-color: var(--blue); background: rgba(88,166,255,.04); }
+  .drop-zone.drag-over { border-color: var(--blue); background: rgba(88,166,255,.08); }
+  .drop-icon { font-size: 30px; display: block; margin-bottom: 6px; }
+  .drop-hint { color: var(--muted); font-size: 12px; margin: 4px 0 14px; }
+
+  .selected-folder {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(63,185,80,.07);
+    border: 1px solid rgba(63,185,80,.25);
+    border-radius: 6px;
+    margin-top: 12px;
+  }
+  .selected-folder-path {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--green);
+    word-break: break-all;
+    flex: 1;
+  }
+
+  .recent-project-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .15s;
+    font-size: 13px;
+  }
+  .recent-project-item:hover { background: rgba(88,166,255,.07); }
+  .recent-project-item.active { background: rgba(63,185,80,.1); border: 1px solid rgba(63,185,80,.25); }
+  .rpi-name { font-weight: 600; }
+  .rpi-path { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Onboarding report */
+  #onboard-report {
+    display: none;
+    margin-top: 16px;
+  }
+
+  .report-summary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .report-section {
+    margin-top: 16px;
+  }
+
+  .report-section-title {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .issue-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .issue-item.critical { border-left-color: var(--red); }
+  .issue-item.high     { border-left-color: var(--orange); }
+  .issue-item.medium   { border-left-color: var(--yellow); }
+  .issue-item.low      { border-left-color: var(--muted); }
+
+  .issue-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .issue-desc  { color: var(--muted); line-height: 1.5; }
+  .issue-fix   { color: var(--blue); margin-top: 4px; font-size: 12px; }
+  .issue-file  { font-family: monospace; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Trend & memory ──────────────────────────────────────── */
+  .trend-up     { color: var(--green); font-weight: 700; }
+  .trend-down   { color: var(--red);   font-weight: 700; }
+  .trend-stable { color: var(--muted); font-weight: 700; }
+
+  .new-commits-banner {
+    background: rgba(227,179,65,.1);
+    border: 1px solid rgba(227,179,65,.35);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--yellow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .new-commits-banner button {
+    padding: 4px 12px;
+    font-size: 12px;
+    background: rgba(227,179,65,.2);
+    color: var(--yellow);
+    border: 1px solid rgba(227,179,65,.4);
+    border-radius: 4px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .prev-state-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 12px;
+  }
+
+  .prev-state-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .prev-state-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .prev-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .prev-stat-val { font-size: 22px; font-weight: 700; }
+  .prev-stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+
+  .monitoring-banner {
+    padding: 10px 20px;
+    background: rgba(88,166,255,.06);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .mon-stat { display: flex; align-items: center; gap: 6px; }
+  .mon-val  { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="logo">🧠</span>
+    <span class="header-title">AI Engineering Organization</span>
+  </div>
+  <div class="header-right">
+    <div class="status-badge">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Connecting…</span>
+    </div>
+    <div class="refresh-timer" id="refresh-timer"></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Stats row -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-decisions">—</div>
+      <div class="stat-label">Decisions Made</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-patterns">—</div>
+      <div class="stat-label">Patterns Discovered</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-success">—</div>
+      <div class="stat-label">Success Rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-experts">6</div>
+      <div class="stat-label">Expert AIs</div>
+    </div>
+  </div>
+
+  <!-- Ask the CEO -->
+  <div class="panel">
+    <div class="panel-header">
+      ▶ Ask the CEO
+    </div>
+    <div class="panel-body">
+      <div class="ask-form">
+        <div class="form-row">
+          <div class="repo-field">
+            <label class="form-label">Repository Path</label>
+            <input type="text" id="repo-path" value="." placeholder="e.g. . or /path/to/repo">
+          </div>
+          <div class="prompt-field">
+            <label class="form-label">Problem Description</label>
+            <textarea id="prompt-input" placeholder='Describe the problem, e.g. "Fix the payment timeout bug in the checkout service"'></textarea>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="send-btn" onclick="sendToCEO()">Send ▶</button>
+          <button class="secondary" onclick="clearResponse()">Clear</button>
+          <span id="send-spinner" style="display:none"><span class="spinner"></span> CEO is thinking…</span>
+        </div>
+      </div>
+
+      <!-- Response area -->
+      <div id="ceo-response">
+        <div class="response-header" id="response-header"></div>
+        <div class="response-section-title">Plan</div>
+        <div class="plan-block" id="response-plan"></div>
+        <div class="response-section-title">Reasoning</div>
+        <div class="reasoning-block" id="response-reasoning"></div>
+      </div>
+      <div id="ceo-error" class="error-state" style="display:none; margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- Recent Decisions -->
+  <div class="panel">
+    <div class="panel-header">
+      🕐 Recent Decisions
+      <span id="decisions-loading" style="margin-left:auto;"><span class="spinner"></span></span>
+    </div>
+    <div class="decision-list" id="decision-list">
+      <div class="empty-state">No decisions yet. Send a problem above to get started.</div>
+    </div>
+  </div>
+
+  <!-- Add Repository -->
+  <div class="panel">
+    <div class="panel-header">🗂 Add Repository</div>
+    <div class="panel-body">
+
+      <!-- Drop zone -->
+      <div id="drop-zone" class="drop-zone"
+           onclick="triggerFolderPick()"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)">
+        <span class="drop-icon">📁</span>
+        <p style="font-weight:500">Drop a folder here or click to browse</p>
+        <p class="drop-hint">Drag from Finder / Explorer, or use the button below</p>
+        <button onclick="event.stopPropagation(); browseFolder()">Browse Files</button>
+        <!-- Hidden file-picker fallback (Firefox / Safari) -->
+        <input type="file" id="folder-picker" webkitdirectory style="display:none"
+               onchange="handleFilePickerChange(event)">
+      </div>
+
+      <!-- Selected folder display -->
+      <div id="selected-folder" class="selected-folder" style="display:none">
+        <span style="font-size:16px">📁</span>
+        <span id="selected-path" class="selected-folder-path"></span>
+        <button class="secondary" style="padding:3px 10px;font-size:12px;flex-shrink:0"
+                onclick="clearFolderSelection()">✕ Clear</button>
+      </div>
+
+      <!-- Manual path input -->
+      <div style="margin-top:14px">
+        <label class="form-label" style="display:flex;align-items:center;gap:6px">
+          Full path
+          <span style="font-size:11px;color:var(--muted);font-weight:400">— auto-filled above, or type here</span>
+        </label>
+        <input type="text" id="onboard-repo-path" placeholder="e.g. /Users/you/projects/myapp  or  ."
+               oninput="onManualPathInput(this.value)">
+      </div>
+
+      <!-- Recent projects quick-select -->
+      <div id="recent-in-add" style="display:none;margin-top:18px">
+        <label class="form-label">Recent projects — click to select</label>
+        <div id="recent-project-list" style="margin-top:6px;border:1px solid var(--border);border-radius:6px;overflow:hidden"></div>
+      </div>
+
+      <!-- Action buttons -->
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button id="onboard-btn" onclick="startOnboarding()">Analyze Now ▶</button>
+        <button class="secondary" onclick="startQuickScan()">Quick Scan</button>
+      </div>
+
+      <!-- Pipeline progress -->
+      <div id="pipeline-steps" class="pipeline-steps" style="display:none;">
+        <div class="pipeline-step" id="step-graph">📊 Graphify</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step" id="step-arch">🏛 Architecture</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step" id="step-security">🔒 Security</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step" id="step-perf">⚡ Performance</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step" id="step-report">📝 Report</div>
+      </div>
+
+      <!-- Onboarding Report -->
+      <div id="onboard-report"><!-- Filled by JS --></div>
+      <div id="onboard-error" class="error-state" style="display:none;margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- Known Repositories -->
+  <div class="panel">
+    <div class="panel-header">
+      📁 Known Repositories
+      <span id="repos-loading" style="margin-left:auto; display:none;"><span class="spinner"></span></span>
+    </div>
+    <!-- Proactive monitoring summary banner -->
+    <div id="monitoring-banner" class="monitoring-banner" style="display:none;">
+      <span>📊 This week:</span>
+      <span class="mon-stat"><span class="mon-val" id="mon-repos">—</span> repos monitored</span>
+      <span class="mon-stat"><span class="mon-val" id="mon-fixed">—</span> issues fixed</span>
+      <span class="mon-stat"><span class="mon-val" id="mon-new">—</span> new issues found</span>
+    </div>
+    <div id="repo-list">
+      <div class="empty-state">No repositories analysed yet. Use "Add Repository" above to get started.</div>
+    </div>
+  </div>
+
+  <!-- CEO Status -->
+  <div class="panel">
+    <div class="panel-header">📊 CEO Status</div>
+    <div class="panel-body">
+      <div class="status-grid">
+        <div>
+          <div class="status-row">
+            <span class="status-key">Average decision time</span>
+            <span class="status-val" id="ceo-avg-time">—</span>
+          </div>
+          <div class="status-row">
+            <span class="status-key">Total decisions</span>
+            <span class="status-val" id="ceo-total">—</span>
+          </div>
+          <div class="status-row">
+            <span class="status-key">Patterns discovered</span>
+            <span class="status-val" id="ceo-patterns">—</span>
+          </div>
+          <div class="status-row">
+            <span class="status-key">Council success rate</span>
+            <span class="status-val" id="ceo-success">—</span>
+          </div>
+        </div>
+        <div>
+          <div class="response-section-title" style="margin-top:0;">Mode Distribution</div>
+          <div class="mode-dist" id="mode-dist">
+            <div class="empty-state" style="padding:20px 0; text-align:left;">No data yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const API = '/api/v1';
+const REFRESH_SEC = 30;
+
+const MODE_LABELS = {
+  decide_alone:        'Mode 1 · Alone',
+  consult_experts:     'Mode 2 · Consult',
+  convene_council:     'Mode 3 · Council',
+  strategic_initiative:'Mode 4 · Strategic',
+};
+
+const MODE_COLORS = {
+  decide_alone:        'var(--green)',
+  consult_experts:     'var(--blue)',
+  convene_council:     'var(--orange)',
+  strategic_initiative:'var(--purple)',
+};
+
+let refreshCountdown = REFRESH_SEC;
+let refreshInterval;
+
+// ── Health check ───────────────────────────────────────────────────────────
+async function checkHealth() {
+  try {
+    const r = await fetch('/health');
+    const data = await r.json();
+    const online = data.status === 'ok';
+    const dot = document.getElementById('status-dot');
+    const txt = document.getElementById('status-text');
+    dot.className = 'status-dot ' + (online ? 'online' : 'offline');
+    txt.textContent = online ? 'Online' : 'Offline';
+  } catch {
+    const dot = document.getElementById('status-dot');
+    dot.className = 'status-dot offline';
+    document.getElementById('status-text').textContent = 'Offline';
+  }
+}
+
+// ── Load stats cards ───────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/agent/ceo/status`);
+    if (!r.ok) return;
+    const d = await r.json();
+
+    setText('stat-decisions', d.total_decisions ?? '—');
+    setText('stat-patterns',  d.patterns_discovered ?? '—');
+    setText('stat-success',   d.success_rate != null ? d.success_rate + '%' : '—');
+
+    // CEO Status panel
+    setText('ceo-total',    d.total_decisions ?? '—');
+    setText('ceo-patterns', d.patterns_discovered ?? '—');
+    setText('ceo-success',  d.success_rate != null ? d.success_rate + '%' : '—');
+
+    const avgS = d.average_duration_ms != null
+      ? (d.average_duration_ms / 1000).toFixed(1) + 's'
+      : '—';
+    setText('ceo-avg-time', avgS);
+
+    renderModeDistribution(d.mode_distribution || {});
+  } catch (e) {
+    console.warn('Stats load failed:', e);
+  }
+}
+
+function renderModeDistribution(dist) {
+  const container = document.getElementById('mode-dist');
+  const keys = Object.keys(dist);
+  if (!keys.length) {
+    container.innerHTML = '<div class="empty-state" style="padding:20px 0; text-align:left;">No data yet</div>';
+    return;
+  }
+  container.innerHTML = keys.map(k => {
+    const pct = dist[k] || 0;
+    const color = MODE_COLORS[k] || 'var(--blue)';
+    return `
+      <div class="mode-dist-row">
+        <span class="mode-dist-label" style="color:${color}">${MODE_LABELS[k] || k}</span>
+        <div class="mode-dist-track">
+          <div class="mode-dist-fill" style="width:${pct}%; background:${color}"></div>
+        </div>
+        <span class="mode-dist-pct">${pct}%</span>
+      </div>`;
+  }).join('');
+}
+
+// ── Load decisions list ────────────────────────────────────────────────────
+async function loadDecisions() {
+  const spinner = document.getElementById('decisions-loading');
+  spinner.style.display = '';
+  try {
+    const r = await fetch(`${API}/agent/ceo/decisions?limit=20`);
+    if (!r.ok) return;
+    const d = await r.json();
+    renderDecisions(d.decisions || []);
+  } catch (e) {
+    console.warn('Decisions load failed:', e);
+  } finally {
+    spinner.style.display = 'none';
+  }
+}
+
+function renderDecisions(decisions) {
+  const list = document.getElementById('decision-list');
+  if (!decisions.length) {
+    list.innerHTML = '<div class="empty-state">No decisions yet. Send a problem above to get started.</div>';
+    return;
+  }
+  list.innerHTML = decisions.map((d, i) => {
+    const mode = d.mode || 'unknown';
+    const label = MODE_LABELS[mode] || mode;
+    const color = MODE_COLORS[mode] || 'var(--blue)';
+    const experts = (d.experts_consulted || []).join(', ') || 'none';
+    const durSec = d.duration_ms ? (d.duration_ms / 1000).toFixed(1) + 's' : '—';
+    const outcome = d.outcome_success === true ? '✅'
+                  : d.outcome_success === false ? '❌' : '🔄';
+    const desc = (d.problem_description || '').substring(0, 100);
+    const time = relativeTime(d.decided_at);
+    const plan = escapeHtml(d.final_plan || 'No plan recorded');
+    const reasoning = escapeHtml(d.mode_reasoning || 'No reasoning recorded');
+    const itemId = 'dec-' + i;
+
+    return `
+    <div class="decision-item" id="${itemId}">
+      <div class="decision-summary" onclick="toggleDecision('${itemId}')">
+        <span class="decision-time">${time}</span>
+        <span class="mode-badge mode-${mode}">${label}</span>
+        <span class="decision-desc">${escapeHtml(desc)}</span>
+        <div class="decision-meta">
+          <span class="decision-duration">${durSec}</span>
+          <span class="outcome-icon">${outcome}</span>
+        </div>
+      </div>
+      <div class="decision-detail" id="${itemId}-detail">
+        <div class="detail-tabs">
+          <button class="tab-btn active" onclick="switchTab(event,'${itemId}','plan')">Plan</button>
+          <button class="tab-btn" onclick="switchTab(event,'${itemId}','reasoning')">Reasoning</button>
+          ${experts !== 'none' ? `<button class="tab-btn" onclick="switchTab(event,'${itemId}','experts')">Experts</button>` : ''}
+        </div>
+        <div class="tab-content active" id="${itemId}-tab-plan">
+          <div class="plan-block">${plan}</div>
+        </div>
+        <div class="tab-content" id="${itemId}-tab-reasoning">
+          <div class="reasoning-block">${reasoning}</div>
+        </div>
+        <div class="tab-content" id="${itemId}-tab-experts">
+          <div class="reasoning-block">Experts consulted: ${escapeHtml(experts)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDecision(id) {
+  const detail = document.getElementById(id + '-detail');
+  detail.classList.toggle('open');
+}
+
+function switchTab(ev, itemId, tab) {
+  const detail = document.getElementById(itemId + '-detail');
+  detail.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  detail.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  ev.target.classList.add('active');
+  const tc = document.getElementById(`${itemId}-tab-${tab}`);
+  if (tc) tc.classList.add('active');
+}
+
+// ── Ask the CEO ────────────────────────────────────────────────────────────
+async function sendToCEO() {
+  const prompt = document.getElementById('prompt-input').value.trim();
+  const repoPath = document.getElementById('repo-path').value.trim() || '.';
+
+  if (!prompt) {
+    document.getElementById('prompt-input').focus();
+    return;
+  }
+
+  const sendBtn = document.getElementById('send-btn');
+  const spinner = document.getElementById('send-spinner');
+  const errDiv  = document.getElementById('ceo-error');
+
+  sendBtn.disabled = true;
+  spinner.style.display = '';
+  errDiv.style.display = 'none';
+  document.getElementById('ceo-response').style.display = 'none';
+
+  try {
+    const r = await fetch(`${API}/agent/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        repo_path: repoPath,
+        workflow_type: 'general_qa',
+      }),
+    });
+
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ error: r.statusText }));
+      throw new Error(err.error || err.detail || r.statusText);
+    }
+
+    const d = await r.json();
+    renderCEOResponse(d);
+
+    // Refresh decisions after a new one is made
+    setTimeout(loadDecisions, 800);
+    setTimeout(loadStats, 800);
+  } catch (e) {
+    errDiv.textContent = 'Error: ' + e.message;
+    errDiv.style.display = 'block';
+  } finally {
+    sendBtn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function renderCEOResponse(d) {
+  const mode = d.ceo_mode || 'unknown';
+  const label = MODE_LABELS[mode] || mode;
+  const experts = d.experts_consulted || [];
+  const confidence = d.confidence != null ? Math.round(d.confidence * 100) : null;
+  const durSec = d.duration_ms ? (d.duration_ms / 1000).toFixed(1) + 's' : null;
+
+  const header = document.getElementById('response-header');
+  header.innerHTML = `
+    <span class="mode-badge mode-${mode}">${label}</span>
+    ${experts.length ? `<div class="expert-chips">${experts.map(e =>
+      `<span class="chip">${escapeHtml(e)}</span>`).join('')}</div>` : ''}
+    ${confidence != null ? `
+    <div class="confidence-bar">
+      <div class="bar-track"><div class="bar-fill" style="width:${confidence}%"></div></div>
+      <span>${confidence}%</span>
+    </div>` : ''}
+    ${durSec ? `<span class="duration-label">${durSec}</span>` : ''}
+  `;
+
+  document.getElementById('response-plan').textContent = d.response || 'No plan returned.';
+  document.getElementById('response-reasoning').textContent = d.reasoning || 'No reasoning provided.';
+  document.getElementById('ceo-response').style.display = 'block';
+}
+
+function clearResponse() {
+  document.getElementById('ceo-response').style.display = 'none';
+  document.getElementById('ceo-error').style.display = 'none';
+  document.getElementById('prompt-input').value = '';
+}
+
+// ── Prompt on Enter (Ctrl/Cmd+Enter) ──────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('prompt-input').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') sendToCEO();
+  });
+  loadRecentInAdd();
+});
+
+// ── Folder browser ────────────────────────────────────────────────────────
+
+function triggerFolderPick() {
+  // Called when the drop-zone itself is clicked (not the browse button)
+  browseFolder();
+}
+
+async function browseFolder() {
+  // Prefer File System Access API (Chrome 86+, Edge 86+)
+  if (window.showDirectoryPicker) {
+    try {
+      const handle = await window.showDirectoryPicker();
+      showSelectedFolder(handle.name, handle.name);
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return; // User cancelled — don't fall through
+    }
+  }
+  // Fallback: webkitdirectory file input (Firefox, Safari)
+  document.getElementById('folder-picker').click();
+}
+
+function handleFilePickerChange(event) {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+  // webkitRelativePath gives "folderName/file.ext"
+  const folderName = files[0].webkitRelativePath.split('/')[0];
+  showSelectedFolder(folderName, folderName);
+}
+
+function handleDragOver(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  document.getElementById('drop-zone').classList.add('drag-over');
+}
+
+function handleDragLeave(event) {
+  event.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+}
+
+async function handleDrop(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  const zone = document.getElementById('drop-zone');
+  zone.classList.remove('drag-over');
+
+  const items = event.dataTransfer.items;
+  if (items && items.length > 0) {
+    // File System Access API (gives directory handle with name)
+    if (items[0].getAsFileSystemHandle) {
+      try {
+        const handle = await items[0].getAsFileSystemHandle();
+        if (handle.kind === 'directory') { showSelectedFolder(handle.name, handle.name); return; }
+      } catch (_) {}
+    }
+    // webkitGetAsEntry fallback
+    if (items[0].webkitGetAsEntry) {
+      const entry = items[0].webkitGetAsEntry();
+      if (entry) { showSelectedFolder(entry.name, entry.name); return; }
+    }
+  }
+  // Last resort: DataTransfer.files
+  const files = event.dataTransfer.files;
+  if (files && files.length > 0) showSelectedFolder(files[0].name, files[0].name);
+}
+
+function showSelectedFolder(displayName, pathHint) {
+  document.getElementById('selected-path').textContent = displayName;
+  document.getElementById('selected-folder').style.display = 'flex';
+  document.getElementById('drop-zone').style.borderColor = 'var(--green)';
+  // Pre-fill the path input only if it's empty or just a dot
+  const inp = document.getElementById('onboard-repo-path');
+  if (!inp.value || inp.value === '.') inp.value = pathHint || displayName;
+}
+
+function clearFolderSelection() {
+  document.getElementById('selected-folder').style.display = 'none';
+  document.getElementById('drop-zone').style.borderColor = '';
+  document.getElementById('onboard-repo-path').value = '';
+}
+
+function onManualPathInput(val) {
+  const sel = document.getElementById('selected-folder');
+  if (val.trim()) {
+    document.getElementById('selected-path').textContent = val.trim();
+    sel.style.display = 'flex';
+    document.getElementById('drop-zone').style.borderColor = 'var(--green)';
+  } else {
+    sel.style.display = 'none';
+    document.getElementById('drop-zone').style.borderColor = '';
+  }
+}
+
+async function loadRecentInAdd() {
+  try {
+    const r = await fetch(`${API}/repo/list`);
+    if (!r.ok) return;
+    const data = await r.json();
+    const repos = (data.repos || []).slice(0, 6);
+    if (repos.length === 0) return;
+
+    const list = document.getElementById('recent-project-list');
+    list.innerHTML = repos.map(repo => {
+      const path = escapeHtml(repo.repo_path || '');
+      const name = escapeHtml(repo.repo_name || repo.repo_path || '');
+      const score = repo.health_score || 0;
+      const cls = score >= 80 ? 'good' : score >= 60 ? 'medium' : 'poor';
+      const arrow = escapeHtml(repo.trend_arrow || '→');
+      return `<div class="recent-project-item" onclick="selectRecentProject(this,'${path}','${name}')">
+        <span style="font-size:16px">📁</span>
+        <div style="flex:1;min-width:0">
+          <div class="rpi-name">${name}</div>
+          <div class="rpi-path">${path}</div>
+        </div>
+        <span class="health-score ${cls}" style="width:34px;height:34px;font-size:11px">${score}</span>
+        <span style="color:var(--muted);font-size:13px">${arrow}</span>
+      </div>`;
+    }).join('') +
+    `<div class="recent-project-item" style="color:var(--muted)" onclick="browseFolder()">
+       <span style="font-size:16px">➕</span>
+       <span>Browse for another folder…</span>
+     </div>`;
+
+    document.getElementById('recent-in-add').style.display = 'block';
+  } catch (_) {}
+}
+
+function selectRecentProject(el, repoPath, name) {
+  document.querySelectorAll('.recent-project-item').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('onboard-repo-path').value = repoPath;
+  showSelectedFolder(name || repoPath, repoPath);
+}
+
+// ── Repository Onboarding ─────────────────────────────────────────────────
+
+const PIPELINE_STEPS = ['step-graph','step-arch','step-security','step-perf','step-report'];
+const PIPELINE_LABELS = {
+  'step-graph':    ['📊 Graphify',     '📊 Graphify ✅'],
+  'step-arch':     ['🏛 Architecture', '🏛 Architecture ✅'],
+  'step-security': ['🔒 Security',     '🔒 Security ✅'],
+  'step-perf':     ['⚡ Performance',  '⚡ Performance ✅'],
+  'step-report':   ['📝 Report',       '📝 Report ✅'],
+};
+
+function showPipeline() {
+  document.getElementById('pipeline-steps').style.display = 'flex';
+  PIPELINE_STEPS.forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'pipeline-step';
+    el.textContent = PIPELINE_LABELS[id][0];
+  });
+}
+
+function setPipelineStep(id, state) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'pipeline-step ' + state;
+  if (state === 'done') el.textContent = PIPELINE_LABELS[id][1];
+  else if (state === 'active') el.textContent = PIPELINE_LABELS[id][0] + ' …';
+  else if (state === 'error') el.textContent = PIPELINE_LABELS[id][0] + ' ✗';
+}
+
+async function startOnboarding(forceFull = false) {
+  const repoPath = document.getElementById('onboard-repo-path').value.trim();
+  if (!repoPath) { alert('Please enter a repository path.'); return; }
+
+  const btn = document.getElementById('onboard-btn');
+  btn.disabled = true;
+  document.getElementById('onboard-error').style.display = 'none';
+  document.getElementById('onboard-report').style.display = 'none';
+
+  if (!forceFull) {
+    // Smart analyze: check state first (returns instantly for known repos)
+    showPipeline();
+    PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'active'));
+    try {
+      const r = await fetch(`${API}/repo/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo_path: repoPath, force_full: false }),
+      });
+      if (!r.ok) {
+        const err = await r.json();
+        PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'error'));
+        showOnboardError(err.detail || 'Analysis failed.');
+        return;
+      }
+      const result = await r.json();
+      PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'done'));
+
+      if (result.status === 'previously_analyzed') {
+        renderPreviouslyAnalyzed(result);
+      } else {
+        renderOnboardReport(result.report || result);
+        loadRepos();
+      }
+      return;
+    } catch (e) {
+      PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'error'));
+      showOnboardError(String(e));
+      return;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // Force-full re-analysis with animated pipeline
+  showPipeline();
+  const stepIds = PIPELINE_STEPS.slice();
+  let stepIdx = 0;
+  setPipelineStep(stepIds[0], 'active');
+  const stepTimer = setInterval(() => {
+    if (stepIdx < stepIds.length - 1) {
+      setPipelineStep(stepIds[stepIdx], 'done');
+      stepIdx++;
+      setPipelineStep(stepIds[stepIdx], 'active');
+    }
+  }, 4000);
+
+  try {
+    const r = await fetch(`${API}/repo/onboard`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo_path: repoPath, force_rebuild: true }),
+    });
+    clearInterval(stepTimer);
+    if (!r.ok) {
+      const err = await r.json();
+      PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'error'));
+      showOnboardError(err.detail || 'Full analysis failed.');
+      return;
+    }
+    const report = await r.json();
+    PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'done'));
+    renderOnboardReport(report);
+    loadRepos();
+  } catch (e) {
+    clearInterval(stepTimer);
+    PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'error'));
+    showOnboardError(String(e));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function startQuickScan() {
+  const repoPath = document.getElementById('onboard-repo-path').value.trim();
+  if (!repoPath) { alert('Please enter a repository path.'); return; }
+
+  document.getElementById('onboard-error').style.display = 'none';
+  document.getElementById('onboard-report').style.display = 'none';
+  showPipeline();
+  PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'active'));
+
+  try {
+    const r = await fetch(`${API}/repo/quick-scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo_path: repoPath }),
+    });
+    if (!r.ok) {
+      const err = await r.json();
+      PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'error'));
+      showOnboardError(err.detail || 'Quick scan failed.');
+      return;
+    }
+    const scan = await r.json();
+    PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'done'));
+    renderQuickScanReport(scan);
+  } catch (e) {
+    PIPELINE_STEPS.forEach(id => setPipelineStep(id, 'error'));
+    showOnboardError(String(e));
+  }
+}
+
+function showOnboardError(msg) {
+  const el = document.getElementById('onboard-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function renderPreviouslyAnalyzed(d) {
+  const container = document.getElementById('onboard-report');
+  const scoreClass = d.health_score >= 70 ? 'good' : d.health_score >= 40 ? 'medium' : 'poor';
+  const trendCls = d.health_trend === 'improving' ? 'trend-up' : d.health_trend === 'declining' ? 'trend-down' : 'trend-stable';
+  const hasChanges = d.files_changed && d.files_changed.length > 0;
+  const newCommits = d.new_commits_detected || 0;
+
+  let changesBanner = '';
+  if (hasChanges || newCommits > 0) {
+    const changeList = (d.files_changed || []).slice(0, 4).map(f => `<code style="font-size:11px;">${escapeHtml(f)}</code>`).join(' ');
+    const more = (d.files_changed || []).length > 4 ? `+${d.files_changed.length - 4} more` : '';
+    changesBanner = `
+      <div class="new-commits-banner">
+        <span>⚡ ${newCommits} new commit${newCommits !== 1 ? 's' : ''} · ${(d.files_changed||[]).length} file${(d.files_changed||[]).length !== 1 ? 's' : ''} changed: ${changeList} ${more}</span>
+        <button onclick="startQuickScan()">Quick Scan →</button>
+      </div>`;
+  }
+
+  container.innerHTML = `
+    ${changesBanner}
+    <div class="prev-state-card">
+      <div class="prev-state-header">
+        <div class="health-score ${scoreClass}">${d.health_score}</div>
+        <div>
+          <div style="font-weight:600; font-size:15px;">${escapeHtml(d.repo_name)}</div>
+          <div style="font-size:12px; color:var(--muted);">
+            Last analysed: ${relativeTime(d.last_analyzed)} ·
+            <span class="${trendCls}">${d.trend_arrow} ${d.health_trend}</span> ·
+            ${d.analysis_count} analyses
+          </div>
+        </div>
+      </div>
+
+      <div class="prev-state-grid">
+        <div class="prev-stat">
+          <div class="prev-stat-val" style="color:var(--red);">${d.critical_issues || 0}</div>
+          <div class="prev-stat-lbl">Critical</div>
+        </div>
+        <div class="prev-stat">
+          <div class="prev-stat-val">${d.issues_found || 0}</div>
+          <div class="prev-stat-lbl">Total Issues</div>
+        </div>
+        <div class="prev-stat">
+          <div class="prev-stat-val" style="color:var(--green);">${d.issues_fixed_since || 0}</div>
+          <div class="prev-stat-lbl">Fixed Since</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button onclick="startOnboarding(true)">Re-Analyse Full</button>
+        <button class="secondary" onclick="startQuickScan()">Quick Scan</button>
+        ${d.last_report_id ? `<button class="secondary" onclick="viewReport('${escapeHtml(d.repo_path)}')">View Last Report</button>` : ''}
+      </div>
+    </div>
+  `;
+  container.style.display = 'block';
+}
+
+function renderOnboardReport(r) {
+  const container = document.getElementById('onboard-report');
+  const scoreClass = r.health_score >= 70 ? 'good' : r.health_score >= 40 ? 'medium' : 'poor';
+
+  // Delta badge (only shown on re-analysis)
+  let deltaBadge = '';
+  if (r.status === 're_analysis' && r.health_delta != null) {
+    const sign = r.health_delta > 0 ? '+' : '';
+    const col  = r.health_delta > 0 ? 'var(--green)' : r.health_delta < 0 ? 'var(--red)' : 'var(--muted)';
+    deltaBadge = `<span style="font-size:13px;color:${col};font-weight:700;">${sign}${r.health_delta} pts</span>`;
+  }
+  const fixedBadge = r.issues_fixed_since > 0
+    ? `<span style="color:var(--green);font-size:12px;">✓ ${r.issues_fixed_since} fixed</span>` : '';
+  const newBadge = r.new_issues_since > 0
+    ? `<span style="color:var(--red);font-size:12px;">+${r.new_issues_since} new</span>` : '';
+
+  let issuesHtml = '';
+  for (const [priority, list] of [['critical',r.critical||[]], ['high',r.high||[]], ['medium',r.medium||[]], ['low',r.low||[]]]) {
+    if (!list.length) continue;
+    issuesHtml += `<div class="report-section">
+      <div class="report-section-title">${priority.toUpperCase()} priority (${list.length})</div>
+      ${list.map(i => `<div class="issue-item ${priority}">
+        <div class="issue-title">${escapeHtml(i.title)}</div>
+        <div class="issue-desc">${escapeHtml(i.description)}</div>
+        ${i.fix_suggestion ? `<div class="issue-fix">→ ${escapeHtml(i.fix_suggestion)}</div>` : ''}
+        ${i.file_path ? `<div class="issue-file">${escapeHtml(i.file_path)}</div>` : ''}
+      </div>`).join('')}
+    </div>`;
+  }
+
+  container.innerHTML = `
+    <div class="response-header" style="margin-bottom:12px;">
+      <div class="health-score ${scoreClass}">${r.health_score}</div>
+      <div>
+        <div style="font-weight:600; font-size:15px;">${escapeHtml(r.project_name || r.repo_path||'')}</div>
+        <div style="font-size:12px; color:var(--muted);">${escapeHtml(r.project_type||'')} · ${escapeHtml(r.language||'')}${r.framework ? ' · ' + escapeHtml(r.framework) : ''}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap;">
+        ${deltaBadge} ${fixedBadge} ${newBadge}
+        ${(r.critical||[]).length ? `<span class="issue-badge critical">${r.critical.length} critical</span>` : ''}
+        ${(r.high||[]).length ? `<span class="issue-badge high">${r.high.length} high</span>` : ''}
+        ${(r.medium||[]).length ? `<span class="issue-badge medium">${r.medium.length} medium</span>` : ''}
+      </div>
+    </div>
+    ${r.graph_available ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+      Graph: ${r.total_nodes} nodes · ${r.total_edges} edges · ${r.communities} modules · ${r.total_files} files
+    </div>` : ''}
+    <div class="response-section-title">Executive Summary</div>
+    <div class="report-summary">${escapeHtml(r.executive_summary||'')}</div>
+    ${r.action_plan ? `<div class="response-section-title" style="margin-top:16px;">Action Plan</div>
+    <div class="report-summary">${escapeHtml(r.action_plan)}</div>` : ''}
+    ${issuesHtml}
+    <div style="font-size:12px;color:var(--muted);margin-top:12px;">
+      ${r.status === 're_analysis' ? 'Re-analysis' : 'New analysis'} · completed in ${(r.duration_ms/1000).toFixed(1)}s
+    </div>
+  `;
+  container.style.display = 'block';
+}
+
+function renderQuickScanReport(scan) {
+  const container = document.getElementById('onboard-report');
+  const riskColor = scan.risk_level === 'high' ? 'var(--red)' : scan.risk_level === 'medium' ? 'var(--orange)' : 'var(--green)';
+
+  // Health delta
+  let healthDelta = '';
+  if (scan.health_before != null && scan.health_after != null) {
+    const delta = scan.health_after - scan.health_before;
+    const sign  = delta > 0 ? '+' : '';
+    const col   = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--muted)';
+    healthDelta = `
+      <span style="font-size:13px; color:var(--muted);">Health:</span>
+      <span style="font-weight:700;">${scan.health_before}</span>
+      <span style="color:var(--muted);">→</span>
+      <span style="font-weight:700;">${scan.health_after}</span>
+      <span style="color:${col}; font-weight:700;">(${sign}${delta})</span>`;
+  }
+
+  const fixedLine = scan.fixed_issues > 0
+    ? `<span style="color:var(--green);">✓ ${scan.fixed_issues} issue${scan.fixed_issues!==1?'s':''} fixed</span>` : '';
+  const newLine = scan.new_issues > 0
+    ? `<span style="color:var(--red);">+${scan.new_issues} new issue${scan.new_issues!==1?'s':''}</span>` : '';
+
+  container.innerHTML = `
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px; flex-wrap:wrap;">
+      <span style="font-weight:600; color:${riskColor}; text-transform:uppercase; font-size:13px;">${scan.risk_level} risk</span>
+      <span style="font-size:12px; color:var(--muted);">
+        ${scan.new_commits > 0 ? `${scan.new_commits} new commit${scan.new_commits!==1?'s':''} · ` : ''}
+        ${scan.changed_files.length} file${scan.changed_files.length!==1?'s':''} changed
+      </span>
+      ${healthDelta ? `<div style="display:flex;gap:6px;align-items:center;font-size:13px;">${healthDelta}</div>` : ''}
+      ${fixedLine || newLine ? `<div style="display:flex;gap:10px;">${fixedLine}${newLine}</div>` : ''}
+    </div>
+    <div class="report-summary">${escapeHtml(scan.impact_summary)}</div>
+    ${scan.changed_files.length ? `
+    <div class="response-section-title" style="margin-top:12px;">Changed Files</div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      ${scan.changed_files.slice(0,10).map(f => `<span class="chip" style="font-family:monospace;font-size:11px;">${escapeHtml(f)}</span>`).join('')}
+      ${scan.changed_files.length > 10 ? `<span class="chip">+${scan.changed_files.length-10} more</span>` : ''}
+    </div>` : ''}
+    ${scan.affected_modules.length ? `
+    <div class="response-section-title" style="margin-top:12px;">Affected Modules</div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      ${scan.affected_modules.map(m => `<span class="chip">${escapeHtml(m)}</span>`).join('')}
+    </div>` : ''}
+    ${scan.recommendations.length ? `
+    <div class="response-section-title" style="margin-top:12px;">Recommendations</div>
+    <ul style="padding-left:20px; color:var(--text); font-size:13px; line-height:1.8;">
+      ${scan.recommendations.map(rec => `<li>${escapeHtml(rec)}</li>`).join('')}
+    </ul>` : ''}
+    <div style="font-size:12px; color:var(--muted); margin-top:10px;">Quick scan completed in ${(scan.duration_ms/1000).toFixed(1)}s</div>
+  `;
+  container.style.display = 'block';
+}
+
+// ── Known Repos list ──────────────────────────────────────────────────────
+
+async function loadRepos() {
+  const loading = document.getElementById('repos-loading');
+  loading.style.display = '';
+  try {
+    const r = await fetch(`${API}/repo/list`);
+    if (!r.ok) return;
+    const d = await r.json();
+    renderRepos(d.repos || []);
+    renderMonitoringBanner(d.weekly_summary || {});
+  } catch {
+    // Server not up yet — silently skip
+  } finally {
+    loading.style.display = 'none';
+  }
+}
+
+function renderMonitoringBanner(summary) {
+  const banner = document.getElementById('monitoring-banner');
+  if (!summary || !summary.repos_monitored) { banner.style.display = 'none'; return; }
+  document.getElementById('mon-repos').textContent  = summary.repos_monitored;
+  document.getElementById('mon-fixed').textContent  = summary.issues_fixed;
+  document.getElementById('mon-new').textContent    = summary.new_issues;
+  banner.style.display = 'flex';
+}
+
+function renderRepos(repos) {
+  const container = document.getElementById('repo-list');
+  if (!repos.length) {
+    container.innerHTML = '<div class="empty-state">No repositories analysed yet. Use "Add Repository" above to get started.</div>';
+    return;
+  }
+
+  container.innerHTML = repos.map(r => {
+    const score = r.health_score ?? 0;
+    const scoreClass = score >= 70 ? 'good' : score >= 40 ? 'medium' : 'poor';
+    const trendCls   = r.trend === 'improving' ? 'trend-up' : r.trend === 'declining' ? 'trend-down' : 'trend-stable';
+    const name       = r.repo_name || r.repo_path.split('/').filter(Boolean).pop();
+    const lastSeen   = r.last_analyzed ? relativeTime(r.last_analyzed) : 'never';
+    const warning    = r.needs_attention ? ' ⚠️' : '';
+    const critBadge  = r.critical_issues > 0
+      ? `<span class="issue-badge critical">${r.critical_issues} critical</span>` : '';
+    const highBadge  = r.high_issues > 0
+      ? `<span class="issue-badge high">${r.high_issues} high</span>` : '';
+
+    // Escape repo_path for inline onclick (replace ' with &apos;)
+    const safePath = r.repo_path.replace(/'/g, '&apos;');
+
+    return `<div class="repo-item">
+      <div class="health-score ${scoreClass}">${score}</div>
+      <div class="repo-info">
+        <div class="repo-name">${escapeHtml(name)}${warning}</div>
+        <div class="repo-path">${escapeHtml(r.repo_path)}</div>
+        <div class="repo-meta">
+          <span class="${trendCls}">${r.trend_arrow || '→'}</span>
+          ${r.trend || 'stable'} ·
+          Last analysed: ${lastSeen} ·
+          ${r.analysis_count} ${r.analysis_count === 1 ? 'analysis' : 'analyses'} ·
+          ${r.total_files} files
+        </div>
+        ${critBadge || highBadge ? `<div class="issue-count">${critBadge}${highBadge}</div>` : ''}
+      </div>
+      <div class="repo-actions">
+        <button onclick="reAnalyze('${safePath}')">Re-Analyse</button>
+        <button class="secondary" onclick="quickScanRepo('${safePath}')">Quick Scan</button>
+        <button class="secondary" onclick="viewReport('${safePath}')">Report</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function reAnalyze(repoPath) {
+  document.getElementById('onboard-repo-path').value = repoPath;
+  document.getElementById('onboard-btn').scrollIntoView({ behavior: 'smooth' });
+  startOnboarding(true);  // force full re-analysis
+}
+
+function quickScanRepo(repoPath) {
+  document.getElementById('onboard-repo-path').value = repoPath;
+  document.getElementById('onboard-btn').scrollIntoView({ behavior: 'smooth' });
+  startQuickScan();
+}
+
+async function viewReport(repoPath) {
+  try {
+    const r = await fetch(`${API}/repo/report/${encodeURIComponent(repoPath)}`);
+    if (!r.ok) { alert('No report found. Run Analyse first.'); return; }
+    const report = await r.json();
+    document.getElementById('onboard-report').scrollIntoView({ behavior: 'smooth' });
+    renderOnboardReport(report);
+  } catch (e) {
+    alert('Error loading report: ' + e);
+  }
+}
+
+// ── Refresh loop ───────────────────────────────────────────────────────────
+function startRefreshLoop() {
+  refreshCountdown = REFRESH_SEC;
+  updateTimerLabel();
+  refreshInterval = setInterval(() => {
+    refreshCountdown--;
+    updateTimerLabel();
+    if (refreshCountdown <= 0) {
+      refreshAll();
+      refreshCountdown = REFRESH_SEC;
+    }
+  }, 1000);
+}
+
+function updateTimerLabel() {
+  document.getElementById('refresh-timer').textContent =
+    `Refreshes in ${refreshCountdown}s`;
+}
+
+function refreshAll() {
+  checkHealth();
+  loadStats();
+  loadDecisions();
+  loadRepos();
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function relativeTime(iso) {
+  if (!iso) return '—';
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60)  return Math.round(diff) + 's ago';
+  if (diff < 3600) return Math.round(diff/60) + 'm ago';
+  if (diff < 86400) return Math.round(diff/3600) + 'h ago';
+  return new Date(iso).toLocaleDateString();
+}
+
+// ── Bootstrap ──────────────────────────────────────────────────────────────
+refreshAll();
+startRefreshLoop();
+</script>
+</body>
+</html>

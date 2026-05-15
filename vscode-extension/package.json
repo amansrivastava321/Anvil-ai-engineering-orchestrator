@@ -1,0 +1,133 @@
+{
+  "name": "ae-orchestrator",
+  "displayName": "AI Engineering Orchestrator",
+  "description": "AI-powered code review, debug, test generation, and more — powered by your local Ollama models.",
+  "version": "0.1.0",
+  "publisher": "ai-engineering",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other", "Linters"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "AI Engineering Orchestrator",
+      "properties": {
+        "ae.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:8008",
+          "description": "Base URL of the AI Engineering Orchestrator server."
+        },
+        "ae.autoConnect": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically connect to the server on startup."
+        },
+        "ae.streamOutput": {
+          "type": "boolean",
+          "default": false,
+          "description": "Stream AI output tokens as they arrive."
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ae-orchestrator",
+          "title": "AI Engineering",
+          "icon": "$(circuit-board)"
+        }
+      ]
+    },
+    "views": {
+      "ae-orchestrator": [
+        {
+          "type": "webview",
+          "id": "ae.panel",
+          "name": "AI Engineering Orchestrator"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ae.review",
+        "title": "Review with AI",
+        "category": "AI Engineering"
+      },
+      {
+        "command": "ae.debug",
+        "title": "Debug with AI",
+        "category": "AI Engineering"
+      },
+      {
+        "command": "ae.generateTests",
+        "title": "Generate Tests",
+        "category": "AI Engineering"
+      },
+      {
+        "command": "ae.explain",
+        "title": "Explain Code",
+        "category": "AI Engineering"
+      },
+      {
+        "command": "ae.refactor",
+        "title": "Refactor Code",
+        "category": "AI Engineering"
+      },
+      {
+        "command": "ae.run",
+        "title": "Run Custom Prompt",
+        "category": "AI Engineering"
+      },
+      {
+        "command": "ae.openDashboard",
+        "title": "Open Web Dashboard",
+        "category": "AI Engineering"
+      },
+      {
+        "command": "ae.indexRepo",
+        "title": "Index Repository for Semantic Search",
+        "category": "AI Engineering"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "submenu": "ae.contextMenu",
+          "group": "ae@1",
+          "when": "explorerResourceIsFolder || resourceExtname"
+        }
+      ],
+      "editor/context": [
+        {
+          "submenu": "ae.contextMenu",
+          "group": "ae@1"
+        }
+      ],
+      "ae.contextMenu": [
+        { "command": "ae.review",        "group": "1_analyze@1" },
+        { "command": "ae.debug",         "group": "1_analyze@2" },
+        { "command": "ae.generateTests", "group": "1_analyze@3" },
+        { "command": "ae.explain",       "group": "1_analyze@4" },
+        { "command": "ae.refactor",      "group": "2_transform@1" },
+        { "command": "ae.run",           "group": "3_custom@1"   }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "ae.contextMenu",
+        "label": "AI Engineering"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}

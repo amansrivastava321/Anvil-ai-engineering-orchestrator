@@ -1,0 +1,206 @@
+/* VSCode webview inherits --vscode-* CSS variables automatically */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background: var(--vscode-sideBar-background);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+#header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot.connected    { background: #4ec94e; }
+.dot.disconnected { background: #e05353; }
+
+#status-label {
+  flex: 1;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+#refresh-btn {
+  background: none;
+  border: none;
+  color: var(--vscode-descriptionForeground);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+#refresh-btn:hover {
+  background: var(--vscode-toolbar-hoverBackground);
+  color: var(--vscode-foreground);
+}
+
+/* ── Stats bar ──────────────────────────────────────────────────────────── */
+
+#stats-bar {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-badge-background);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+/* ── Section headings ───────────────────────────────────────────────────── */
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+h3 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vscode-sideBarSectionHeader-foreground, var(--vscode-descriptionForeground));
+}
+
+/* ── Quick actions grid ─────────────────────────────────────────────────── */
+
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.action-btn {
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: none;
+  border-radius: 3px;
+  padding: 5px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.action-btn:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* ── Custom run ─────────────────────────────────────────────────────────── */
+
+#prompt-input {
+  width: 100%;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border, transparent);
+  border-radius: 3px;
+  padding: 5px 7px;
+  font-family: inherit;
+  font-size: var(--vscode-font-size);
+  resize: vertical;
+}
+#prompt-input:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+}
+
+#run-btn {
+  align-self: flex-start;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  border-radius: 3px;
+  padding: 5px 14px;
+  font-size: 12px;
+  cursor: pointer;
+}
+#run-btn:hover  { background: var(--vscode-button-hoverBackground); }
+#run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#run-spinner {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  font-style: italic;
+}
+
+/* ── History ────────────────────────────────────────────────────────────── */
+
+#history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.exec-item {
+  background: var(--vscode-list-inactiveSelectionBackground);
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: default;
+}
+.exec-item:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.exec-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.exec-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.exec-dot.ok  { background: #4ec94e; }
+.exec-dot.err { background: #e05353; }
+
+.exec-workflow {
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exec-meta {
+  color: var(--vscode-descriptionForeground);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.exec-snippet {
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Utility ────────────────────────────────────────────────────────────── */
+
+.hidden { display: none !important; }

@@ -1,0 +1,15 @@
+# Default model routing configuration
+task_routing:
+  code_generation: qwen2.5-coder:7b
+  code_review: qwen2.5-coder:14b
+  debugging: qwen2.5-coder:14b
+  architecture_analysis: qwen2.5-coder:14b
+  testing: qwen2.5-coder:7b
+  documentation: llama3.1:8b
+  general_qa: llama3.1:8b
+  report: llama3.1:8b
+
+fallback_order:
+  - qwen2.5-coder:7b
+  - llama3.1:8b
+  - deepseek-coder:6.7b

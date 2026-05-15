@@ -1,0 +1,17 @@
+
+# --- Skills ---
+# github  skill  [name]  <owner/repo>  <path-or-dir>  [ref]
+
+github  skill  brainstorming  obra/superpowers  skills/brainstorming/SKILL.md
+github  skill  requesting-code-review  obra/superpowers  skills/requesting-code-review/SKILL.md
+github  skill  subagent-driven-development  obra/superpowers  skills/subagent-driven-development/SKILL.md
+github  skill  systematic-debugging  obra/superpowers  skills/systematic-debugging/SKILL.md
+github  skill  test-driven-development  obra/superpowers  skills/test-driven-development/SKILL.md
+github  skill  using-superpowers  obra/superpowers  skills/using-superpowers/SKILL.md
+github  skill  verification-before-completion  obra/superpowers  skills/verification-before-completion/SKILL.md
+github  skill  writing-plans  obra/superpowers  skills/writing-plans/SKILL.md
+
+local  skill  architecture-agent  prompts/architecture_agent.md
+local  skill  code-agent  prompts/code_agent.md
+local  skill  documentation-agent  prompts/documentation_agent.md
+local  skill  testing-agent  prompts/testing_agent.md
