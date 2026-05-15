@@ -1,4 +1,4 @@
-# AI Engineering Intelligence OS
+# Anvil — Autonomous Engineering Intelligence
 
 **Not just a coding assistant — an autonomous engineering intelligence that watches,
 understands, and improves your codebase.**
@@ -7,17 +7,19 @@ understands, and improves your codebase.**
 
 ## What It Is
 
-The AI Engineering Orchestrator is a production-grade, locally-run AI system that
-combines multi-agent reasoning, a structural code knowledge graph, and a skill
-catalog to form a persistent engineering intelligence layer on top of any Python
-codebase. Unlike a chat-based coding assistant, the orchestrator maintains execution
-memory, tracks patterns across runs, routes tasks to the most capable model for each
-job, and stores every analysis and generated artifact for later retrieval. It is built
-to run entirely on-premise — no API keys required, no code leaves your machine.
+Anvil is a production-grade, locally-run AI system that combines a self-governing
+AI organization, semantic code search, and a structural knowledge graph to form a
+persistent engineering intelligence layer on top of any Python codebase. Unlike a
+chat-based coding assistant, Anvil maintains execution memory, tracks patterns across
+runs, routes tasks to the most capable model for each job, and stores every analysis
+and generated artifact for later retrieval. It is built to run entirely on-premise —
+no API keys required, no code leaves your machine.
 
 **Capabilities:**
 
+- Self-governing AI organization: CEO AI, 6-member Council, Synthesizer, and Intuition Engine
 - Static code analysis via AST tools and graph-aware context (Graphify integration)
+- Semantic code search via bge-m3 embeddings — finds relevant functions by meaning, not just name
 - Multi-agent routing: six specialized agents cover debugging, architecture,
   testing, code generation, performance, and documentation
 - Intelligent model selection: routes each task to the best locally available Ollama
@@ -25,12 +27,24 @@ to run entirely on-premise — no API keys required, no code leaves your machine
 - Streaming and non-streaming response modes
 - Persistent artifact store with per-execution run metadata
 - Execution memory and pattern store that improve routing decisions over time
+- Weekly self-improvement cycles via evolution service
+- Continuous repo monitoring via proactive service
 - Kubernetes-style liveness and readiness probes for deployment
-- 858 tests, 85.14% coverage, fully typed Python 3.11/3.12
+- 1,103 tests, 85.14% coverage, fully typed Python 3.11/3.12
 
 ---
 
 ## Architecture
+
+### AI Organization Layer
+
+Anvil uses a self-governing AI organization, not a fixed pipeline:
+
+- **CEO AI** — Receives every request, decides operating mode, learns from outcomes
+- **Mode Selector** — AI decides: Mode 1 (alone), Mode 2 (consult experts), Mode 3 (full council)
+- **AI Council** — 6 specialized agents (Architect, Security, Performance, Testing, Memory, Domain) debate, vote, and synthesize solutions
+- **Synthesizer** — Combines all proposals into one unified plan, resolves conflicts
+- **Intuition Engine** — Discovers patterns from execution history using bge-m3 semantic matching
 
 ```
                          ┌─────────────────────────────────────────────────────┐
@@ -39,22 +53,29 @@ to run entirely on-premise — no API keys required, no code leaves your machine
                          └────────────────────┬────────────────────────────────┘
                                               │
                          ┌────────────────────▼────────────────────────────────┐
-                         │                  Orchestrator                        │
-                         │   - Request validation & routing                     │
-                         │   - Multi-agent workflow coordination                │
-                         │   - Retry / circuit-breaker logic                    │
-                         │   - Streaming & non-streaming execution              │
+                         │                   CEO AI                             │
+                         │   - Analyzes request + repo patterns                 │
+                         │   - Selects operating mode (1 / 2 / 3)              │
+                         │   - Routes to Council or acts directly               │
+                         │   - Records outcomes, develops intuition             │
                          └──────────┬──────────────────────┬───────────────────┘
                                     │                      │
               ┌─────────────────────▼──────┐   ┌──────────▼───────────────────┐
-              │          Agents             │   │       Context Service         │
-              │  - CodeAgent               │   │  - Graphify parser           │
-              │  - ArchitectureAgent       │   │  - Skillfile client          │
-              │  - TestingAgent            │   │  - File reader / searcher    │
-              │  - DocumentationAgent      │   │  - AST analyzer              │
-              │  - PerformanceAgent        │   │  - Dependency analyzer       │
-              │  - SecurityAgent           │   │  - Security scanner          │
+              │         AI Council          │   │       Context Service         │
+              │  - Architect               │   │  - Graphify parser           │
+              │  - Security                │   │  - bge-m3 semantic search    │
+              │  - Performance             │   │  - File reader / searcher    │
+              │  - Testing                 │   │  - AST analyzer              │
+              │  - Memory                  │   │  - Dependency analyzer       │
+              │  - Domain Expert           │   │  - Security scanner          │
               └─────────────┬──────────────┘   └──────────────────────────────┘
+                            │
+              ┌─────────────▼──────────────┐
+              │        Synthesizer          │
+              │  - Merges all proposals     │
+              │  - Resolves conflicts       │
+              │  - Produces unified plan    │
+              └─────────────┬──────────────┘
                             │
               ┌─────────────▼──────────────┐
               │       Model Service         │
@@ -81,6 +102,30 @@ to run entirely on-premise — no API keys required, no code leaves your machine
 
 ---
 
+## Interfaces
+
+Anvil is accessible through three interfaces:
+
+| Interface | How to Access | Best For |
+|-----------|---------------|----------|
+| **Web Dashboard** | `http://localhost:8008/dashboard` | Drag & drop folders, health reports |
+| **CLI Tool** | `anvil` command in terminal | Quick requests, interactive folder picker |
+| **VSCode Extension** | Install from `vscode-extension/` | Inline annotations, side panel, CodeLens |
+
+---
+
+## How It Works
+
+Anvil is not a chatbot. It's a self-governing AI engineering organization:
+
+1. **CEO AI** receives your request and decides how to handle it
+2. **Mode Selection** — AI decides: act alone, consult experts, or convene full council
+3. **AI Council** — 6 specialized agents debate, vote, and synthesize the best approach
+4. **Execution** — The chosen plan runs with full tool access (Graphify, file I/O, test runner)
+5. **Learning** — Every decision recorded. Patterns discovered. Performance improves weekly.
+
+---
+
 ## Quick Start
 
 ### Requirements
@@ -91,13 +136,13 @@ to run entirely on-premise — no API keys required, no code leaves your machine
 
 ```bash
 # 1. Clone and install
-git clone <repo-url> ai-engineering-orchestrator
-cd ai-engineering-orchestrator
+git clone <repo-url> anvil
+cd anvil
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
 # 2. Pull a model
-ollama pull deepseek-r1:7b
+ollama pull dolphin-mistral:7b
 
 # 3. Start the server
 uvicorn app.main:app --host 0.0.0.0 --port 8008 --reload
@@ -132,49 +177,156 @@ brew install ollama
 # Start the Ollama daemon (if not running as a system service)
 ollama serve
 
-# Pull models — the orchestrator selects the best one per task type
-ollama pull deepseek-r1:7b        # recommended: strong reasoning, 8 GB VRAM
-ollama pull qwen2.5-coder:7b      # code generation and review (fast)
-ollama pull qwen2.5-coder:14b     # code review and architecture (powerful)
-ollama pull llama3.1:8b           # documentation and general Q&A
-ollama pull deepseek-coder:6.7b   # code generation fallback
+# Pull models — Anvil selects the best one per task type
+ollama pull dolphin-mistral:7b     # Best all-around model (start here)
+ollama pull deepseek-r1:7b         # Reasoning and debugging
+ollama pull dolphincoder:7b        # Code generation (fine-tuned)
+ollama pull qwen3.5:9b             # Pattern discovery and analysis
+ollama pull gemma4:e4b             # Architecture and complex tasks
+ollama pull phi4-mini:latest       # Fast mode selection
+ollama pull bge-m3:latest          # Semantic code search (embeddings, not chat)
 ```
 
 **Available model summary:**
 
-| Model | Size | Best For | Context Window |
-|-------|------|----------|----------------|
-| `deepseek-r1:7b` | ~4.7 GB | Debugging, reasoning, general analysis | 8192 |
-| `qwen2.5-coder:7b` | ~4.5 GB | Code generation, review, testing | 32768 |
-| `qwen2.5-coder:14b` | ~9 GB | Architecture analysis, deep code review | 32768 |
-| `llama3.1:8b` | ~4.9 GB | Documentation, reports, general Q&A | 128000 |
-| `deepseek-coder:6.7b` | ~3.8 GB | Code generation fallback | 16384 |
+| Model | Size | Best For |
+|-------|------|----------|
+| `dolphin-mistral:7b` | 4.1 GB | General reasoning, council proposals, documentation |
+| `deepseek-r1:7b` | 4.7 GB | Debugging, conflict resolution, synthesis |
+| `dolphincoder:7b` | 4.2 GB | Code generation (fine-tuned for writing code) |
+| `qwen3.5:9b` | 6.6 GB | Pattern discovery, analytical reflection |
+| `gemma4:e4b` | 9.6 GB | Architecture analysis, complex multi-system tasks |
+| `phi4-mini:latest` | 2.5 GB | Mode selection, simple classification (fast) |
+| `bge-m3:latest` | 1.2 GB | Semantic code search via embeddings (not for chat) |
+| `qwen2.5vl:7b` | 6.0 GB | Vision/screenshot analysis only (not for text tasks) |
 
-You do not need all models. One model is enough to start. The orchestrator falls
-back through the configured fallback chain if the preferred model is unavailable.
+You do not need all models. One model is enough to start.
 
 Default task routing (configured in `config/models/default.yaml`):
 
-| Task Type | Default Model |
-|-----------|---------------|
-| `code_generation` | `qwen2.5-coder:7b` |
-| `code_review` | `qwen2.5-coder:14b` |
-| `debugging` | `qwen2.5-coder:14b` |
-| `architecture_analysis` | `qwen2.5-coder:14b` |
-| `testing` | `qwen2.5-coder:7b` |
-| `documentation` | `llama3.1:8b` |
-| `general_qa` | `llama3.1:8b` |
-| `report` | `llama3.1:8b` |
+| Task Type | Default Model | Why |
+|-----------|---------------|-----|
+| `code_generation` | `dolphincoder:7b` | Fine-tuned specifically for writing code |
+| `code_review` | `dolphin-mistral:7b` | Best instruction-following for review |
+| `debugging` | `deepseek-r1:7b` | Actual reasoning over root causes |
+| `architecture_analysis` | `gemma4:e4b` | Largest model for complex structural analysis |
+| `testing` | `dolphincoder:7b` | Code generation for test writing |
+| `documentation` | `dolphin-mistral:7b` | General writing and explanation |
+| `general_qa` | `dolphin-mistral:7b` | Best all-around model |
 
 Override the model for any individual request by setting `"model"` in the
 request body.
 
 ---
 
+## Cloud Models
+
+Anvil supports cloud-hosted models from OpenAI, Anthropic, Google, and OpenRouter
+alongside local Ollama models. No config files needed — just export an API key.
+
+### Enabling cloud providers
+
+```bash
+# OpenAI — gpt-4o, gpt-4o-mini, o1, o1-mini
+export OPENAI_API_KEY=sk-...
+
+# Anthropic — claude-3.5-sonnet, claude-3-opus, claude-3-haiku
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Google Gemini — gemini-2.0-flash, gemini-1.5-pro
+export GOOGLE_API_KEY=AIza...
+
+# OpenRouter — 200+ models through a single key
+# (openai/gpt-4o, anthropic/claude-3.5-sonnet, deepseek/deepseek-r1, …)
+export OPENROUTER_API_KEY=sk-or-...
+```
+
+Restart Anvil and the models appear automatically:
+
+```bash
+curl http://localhost:8008/api/v1/models/
+# {
+#   "local":  [{"name": "dolphin-mistral:7b", "provider": "ollama", ...}],
+#   "cloud":  [{"name": "gpt-4o", "provider": "openai", ...},
+#              {"name": "claude-3-5-sonnet-20241022", "provider": "anthropic", ...}],
+#   "total": N
+# }
+```
+
+### Using a cloud model in a request
+
+```bash
+curl -X POST http://localhost:8008/api/v1/agent/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "repo_path": "/path/to/your/repo",
+    "query":    "Review the auth module for security issues",
+    "model":    "gpt-4o"
+  }'
+```
+
+Anvil routes the request to OpenAI automatically. The CEO and Council work the
+same way regardless of whether the model is local or cloud-hosted.
+
+### Behaviour without API keys
+
+If no API keys are set, Anvil works exactly as before — only local models appear
+in the model list, no errors, no warnings. Cloud support is invisible until configured.
+
+### Provider summary
+
+| Provider | Env var | Models |
+|----------|---------|--------|
+| OpenAI | `OPENAI_API_KEY` | gpt-4o, gpt-4o-mini, o1, o1-mini |
+| Anthropic | `ANTHROPIC_API_KEY` | claude-3.5-sonnet, claude-3-opus, claude-3-haiku |
+| Google | `GOOGLE_API_KEY` | gemini-2.0-flash, gemini-1.5-pro |
+| OpenRouter | `OPENROUTER_API_KEY` | 200+ models via one key |
+
+**OpenRouter is the easiest path.** One key gives access to every major model
+from every provider — no separate accounts needed.
+
+---
+
+## Adding New Models
+
+Anvil auto-discovers any model available in Ollama. No config changes needed.
+
+### Local Models
+
+```bash
+ollama pull <model-name>
+# Restart Anvil — model auto-discovered
+uvicorn app.main:app --port 8008
+```
+
+### Cloud Models (Optional)
+
+Set the API key for any provider. Anvil auto-detects and makes models available:
+
+```bash
+export OPENAI_API_KEY=sk-...           # gpt-4o, o1, gpt-4o-mini
+export ANTHROPIC_API_KEY=sk-ant-...    # claude-3.5-sonnet, claude-3-opus
+export GOOGLE_API_KEY=...              # gemini-2.0-flash, gemini-1.5-pro
+export OPENROUTER_API_KEY=sk-or-...    # 200+ models via single API key
+```
+
+Restart Anvil. Cloud models appear alongside local models automatically.
+No API keys set? Anvil works with local models only. No errors.
+
+### Verify
+
+```bash
+curl http://localhost:8008/api/v1/models/
+```
+
+Returns all available models — both local and cloud.
+
+---
+
 ## Graphify Setup
 
 Graphify performs static AST extraction and builds a knowledge graph of your
-codebase. When available, the orchestrator feeds graph data — god-nodes, community
+codebase. When available, Anvil feeds graph data — god-nodes, community
 clusters, critical paths, and cross-module dependencies — into agent prompts,
 significantly improving analysis quality.
 
@@ -193,7 +345,7 @@ graphify run .
 # GRAPH_REPORT.md  — human-readable summary
 ```
 
-The orchestrator detects Graphify automatically at startup. If the CLI is not
+Anvil detects Graphify automatically at startup. If the CLI is not
 found it prints a warning and continues — agents fall back to file-based context
 assembly.
 
@@ -261,7 +413,7 @@ health endpoints.
 ```
 
 All fields except `workflow_type`, `repo_path`, and `query` are optional.
-When `model` is omitted the orchestrator selects the best available model
+When `model` is omitted Anvil selects the best available model
 for the given workflow type.
 
 ### Agent Run Response Body
@@ -317,7 +469,7 @@ ollama:
   base_url: http://localhost:11434
   timeout: 120
   max_retries: 3
-  default_model: qwen2.5-coder:7b
+  default_model: dolphin-mistral:7b
 
 logging:
   level: INFO
@@ -364,7 +516,7 @@ pytest tests/ --cov=app --cov-report=html
 open htmlcov/index.html
 ```
 
-Current coverage: **85.14%** across 858 tests. The minimum enforced threshold is
+Current coverage: **85.14%** across 1,103 tests. The minimum enforced threshold is
 85% (configured in `pyproject.toml` under `--cov-fail-under=85`).
 
 ---
@@ -372,7 +524,7 @@ Current coverage: **85.14%** across 858 tests. The minimum enforced threshold is
 ## Project Structure
 
 ```
-ai-engineering-orchestrator/
+anvil/
 ├── app/
 │   ├── main.py                     # FastAPI app factory and lifecycle events
 │   ├── api/v1/
@@ -381,6 +533,17 @@ ai-engineering-orchestrator/
 │   │       ├── agent.py            # /agent/run, /agent/run/stream, /agent/stats
 │   │       ├── health.py           # /system/status, /live, /ready, /info
 │   │       └── models.py           # /models/ listing and health
+│   ├── ai/                          # AI Organization — CEO, Council, Synthesizer
+│   │   ├── ceo.py                   # CEO decides mode, learns, develops intuition
+│   │   ├── council.py               # Council debate and voting system
+│   │   ├── council_members.py       # 6 specialized AI experts
+│   │   ├── synthesizer.py           # Combines proposals into unified plans
+│   │   ├── mode_selector.py         # AI-driven mode selection
+│   │   ├── intuition.py             # Pattern discovery via bge-m3
+│   │   ├── relevance.py             # Finds relevant files for any task
+│   │   ├── code_context_builder.py  # Builds focused 1,200-token context
+│   │   ├── context_budget.py        # Hard token limits per category
+│   │   └── model_routing.py         # Routes tasks to optimal models
 │   ├── agents/
 │   │   ├── base_agent.py           # Abstract agent base class
 │   │   ├── agent_factory.py        # Agent instantiation and routing
@@ -395,12 +558,18 @@ ai-engineering-orchestrator/
 │   │   ├── orchestrator.py         # Central coordination (the conductor)
 │   │   ├── context_service.py      # Context assembly from files + graph
 │   │   ├── model_service.py        # Model selection and capability tiers
-│   │   └── learning_service.py     # Feedback loop and pattern extraction
+│   │   ├── learning_service.py     # Feedback loop and pattern extraction
+│   │   ├── cloud_registry.py       # Auto-discovers cloud providers
+│   │   ├── onboarding_service.py   # Automatic repo analysis pipeline
+│   │   ├── evolution_service.py    # Weekly self-improvement cycles
+│   │   └── proactive_service.py    # Continuous repo monitoring
 │   ├── integrations/
 │   │   ├── ollama/                 # Ollama HTTP client + streaming
 │   │   ├── graphify/               # Graph parser and client wrapper
 │   │   ├── skillfile/              # Skillfile catalog client
-│   │   └── ide/                    # MCP server, Windsurf adapter
+│   │   ├── ide/                    # MCP server, Windsurf adapter
+│   │   ├── cloud/                  # Cloud model providers (OpenAI, Anthropic, etc.)
+│   │   └── code_indexer.py         # bge-m3 semantic code index
 │   ├── tools/
 │   │   ├── file_system/            # file_reader, file_writer, file_search
 │   │   ├── code_analysis/          # AST analyzer, dependency analyzer, security scanner
@@ -421,6 +590,7 @@ ai-engineering-orchestrator/
 │   │   ├── config/                 # Settings (pydantic-settings), models config
 │   │   ├── cache/                  # In-memory and Redis cache backends
 │   │   ├── monitoring/             # Structured logging, Prometheus metrics, tracing
+│   │   ├── repo_state.py           # Repository memory and health tracking
 │   │   └── security.py             # Path validation, input sanitization
 │   ├── models/
 │   │   ├── requests.py             # OrchestratorRequest schema
@@ -431,6 +601,9 @@ ai-engineering-orchestrator/
 │       ├── retry.py                # Async retry + circuit breaker
 │       ├── formatters.py           # Response formatting helpers
 │       └── async_utils.py          # Async concurrency utilities
+├── cli/
+│   └── ae.py                       # CLI tool with interactive folder picker
+├── vscode-extension/               # VSCode extension for Anvil
 ├── config/
 │   ├── environments/development.yaml
 │   └── models/default.yaml
@@ -442,12 +615,15 @@ ai-engineering-orchestrator/
 ├── data/
 │   ├── artifacts/runs/            # Per-execution run.json + response.md
 │   ├── memory/                    # Persistent memory store
+│   ├── code_indexes/              # bge-m3 function embeddings
+│   ├── repo_states/               # Per-repo health history
+│   ├── ai_decisions/              # CEO decision records and patterns
 │   └── logs/                      # Structured JSON logs
 ├── docs/
 │   ├── demo/end_to_end_demo.md    # Full walkthrough with real results
 │   ├── api/                       # API reference docs
 │   └── architecture/              # Architecture decision records
-├── tests/                         # 858 tests, 85.14% coverage
+├── tests/                         # 1,103 tests, 85.14% coverage
 ├── prompts/                       # Agent system prompt templates
 ├── scripts/                       # Utility scripts (migrations, seed data)
 └── pyproject.toml                 # Build config, dependencies, tool settings
@@ -457,36 +633,23 @@ ai-engineering-orchestrator/
 
 ## Roadmap
 
-The current release handles on-demand workflows triggered by API calls. The
-following capabilities are planned for future releases:
-
-**Proactive Monitoring**
-- File-system watcher that detects changes in the repository and automatically
-  queues a relevant workflow (e.g., run `debug_analysis` when a test starts failing)
-- Periodic graph regeneration to keep the Graphify context current without manual
-  invocation
-
-**Autonomous Detection**
-- Security scanner that continuously monitors committed code for known vulnerability
-  patterns and files a structured report without requiring a user prompt
-- Coverage drift detection: alert when test coverage drops below a configurable
-  threshold after a commit
-
-**Multi-Agent Collaboration**
-- Parallel agent execution: `architecture_analysis` and `debug_analysis` running
-  simultaneously and synthesizing a combined report
-- Agent-to-agent handoff: the testing agent automatically receives output from
-  the debug agent to generate regression tests for the identified bug
+Anvil's core organization (CEO, Council, Synthesizer, Intuition Engine), proactive
+monitoring, and multi-agent collaboration are all production-ready. Planned future
+work:
 
 **IDE Integration**
-- MCP server (already scaffolded in `app/integrations/ide/mcp_server.py`) for
+- Full MCP server (scaffolded in `app/integrations/ide/mcp_server.py`) for
   Windsurf and other MCP-compatible editors
-- In-editor overlay of graph data: hover a function to see its connectivity score
+- In-editor graph overlay: hover a function to see its connectivity score
   and community membership
 
 **Performance and Scale**
 - Redis-backed execution queue for high-concurrency environments
 - Distributed worker mode using Celery or Ray for long-running analysis jobs
+
+**Extended Model Support**
+- Automatic benchmark harness that continuously measures model quality per task
+  type and updates routing weights without human intervention
 
 ---
 

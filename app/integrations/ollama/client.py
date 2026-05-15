@@ -325,6 +325,21 @@ class RequestQueue:
 # Ollama Client
 # ============================================================================
 
+def _get_cloud_client(model_name: str):
+    """
+    Return the cloud provider client for *model_name*, or None for local models.
+
+    Imported lazily to avoid a circular-import between the ollama package and
+    the services layer.  The import cost is paid only once (registry is a
+    singleton) and only when a cloud model is actually requested.
+    """
+    try:
+        from app.services.cloud_registry import get_cloud_registry
+        return get_cloud_registry().get_client_for_model(model_name)
+    except Exception:
+        return None
+
+
 class OllamaClientError(Exception):
     """Base exception for Ollama client errors."""
     def __init__(
@@ -666,25 +681,42 @@ class OllamaClient:
         **kwargs
     ) -> Union[str, AsyncIterator[str]]:
         """
-        Send chat request to Ollama with full error handling and retries.
-        
+        Send chat request to Ollama or a cloud provider with full error handling.
+
+        If *model* is a recognised cloud model (gpt-4o, claude-3.5-sonnet, …)
+        the request is transparently routed to the appropriate cloud client.
+        Callers never need to know where the model runs.
+
         Args:
-            model: Model name
+            model: Model name (local Ollama tag or cloud model name)
             messages: List of message dicts with 'role' and 'content'
             temperature: Model temperature (0.0 - 2.0)
             max_tokens: Maximum tokens to generate
             stream: Whether to stream the response
             **kwargs: Additional model parameters
-            
+
         Returns:
             Response string or async iterator for streaming
-            
+
         Raises:
             ModelNotFoundError: If model not found
             ModelTimeoutError: If request times out
             ModelOverloadedError: If model is overloaded
         """
-        # Validate model name
+        # Route cloud models BEFORE local validation — cloud names like
+        # "gpt-4o" or "openai/gpt-4o" would fail the Ollama name regex.
+        cloud_client = _get_cloud_client(model)
+        if cloud_client is not None:
+            logger.info("Routing to cloud provider", model=model, provider=cloud_client.provider_name)
+            return await cloud_client.chat(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stream=stream,
+            )
+
+        # Validate model name (Ollama requires name:tag format)
         if not validate_model(model):
             raise ValueError(f"Invalid model name: {model}")
         

@@ -21,21 +21,33 @@ async def list_models(
 ):
     """
     List available models, optionally filtered by task or tier.
-    
+
+    Returns models grouped into ``local`` (Ollama) and ``cloud`` (API-hosted)
+    lists, plus a flat ``models`` list for backward compatibility.
+
     Task types: code_generation, code_review, debugging, architecture_analysis, etc.
     Tiers: fast, balanced, powerful, specialized
     """
     service = get_model_service()
-    
+
     task = TaskCategory(task_type) if task_type else None
     model_tier = ModelTier(tier) if tier else None
-    
+
+    # Flat list (backward-compatible)
     models = await service.list_available_models(
         task_type=task,
         tier=model_tier,
     )
-    
-    return {"models": models, "total": len(models)}
+
+    # Grouped view (new)
+    grouped = await service.list_all_models_grouped()
+
+    return {
+        "models": models,
+        "local": grouped["local"],
+        "cloud": grouped["cloud"],
+        "total": len(models),
+    }
 
 
 @router.get("/{model_name}")

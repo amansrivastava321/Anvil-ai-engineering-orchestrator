@@ -22,6 +22,7 @@ import structlog
 from app.core.config.settings import settings
 from app.core.monitoring.metrics import model_requests, model_errors
 from app.integrations.ollama.client import OllamaClient, get_default_client
+from app.services.cloud_registry import CloudRegistry, get_cloud_registry
 from app.utils.validators import validate_model
 
 logger = structlog.get_logger(__name__)
@@ -245,24 +246,36 @@ class ModelService:
     - Usage tracking and statistics
     """
     
-    def __init__(self, ollama_client: Optional[OllamaClient] = None):
+    def __init__(
+        self,
+        ollama_client: Optional[OllamaClient] = None,
+        cloud_registry: Optional[CloudRegistry] = None,
+    ):
         """
         Initialize model service.
-        
+
         Args:
             ollama_client: OllamaClient instance (uses default if not provided)
+            cloud_registry: CloudRegistry for cloud provider routing (auto-detected if None)
         """
         self.ollama = ollama_client or get_default_client()
-        
+        self.cloud_registry = cloud_registry or get_cloud_registry()
+
         # Model availability cache
         self._availability_cache: Dict[str, Tuple[bool, datetime]] = {}
         self._availability_ttl = timedelta(seconds=60)
-        
+
         # Selection statistics
         self._selection_counts: Dict[str, int] = {}
         self._fallback_counts: Dict[str, int] = {}
-        
-        logger.info("Model service initialized")
+
+        if self.cloud_registry.has_cloud_models():
+            logger.info(
+                "Model service initialized with cloud providers",
+                providers=list(self.cloud_registry.provider_health().keys()),
+            )
+        else:
+            logger.info("Model service initialized (local models only)")
     
     async def select_model(
         self,
@@ -293,9 +306,12 @@ class ModelService:
         Raises:
             ValueError: If no suitable model found
         """
-        # If preferred model specified, check availability
+        # If preferred model specified, check availability.
+        # Cloud model names (e.g. "gpt-4o") don't match the Ollama name:tag
+        # regex, so we check the cloud registry first.
         if preferred_model:
-            if validate_model(preferred_model):
+            is_cloud = self.cloud_registry.get_client_for_model(preferred_model) is not None
+            if is_cloud or validate_model(preferred_model):
                 if not require_available or await self._is_available(preferred_model):
                     self._record_selection(preferred_model)
                     logger.debug(
@@ -437,21 +453,49 @@ class ModelService:
     async def get_model_info(self, model_name: str) -> Optional[Dict[str, Any]]:
         """
         Get comprehensive model information.
-        
+
+        For cloud models, returns metadata from the CloudRegistry without
+        making any Ollama API calls.
+
         Args:
             model_name: Name of the model
-            
+
         Returns:
-            Model information dictionary
+            Model information dictionary, or None if the model is unknown
         """
+        # Cloud model path
+        cloud_client = self.cloud_registry.get_client_for_model(model_name)
+        if cloud_client is not None:
+            cloud_models = self.cloud_registry.get_all_models()
+            cloud_entry = next(
+                (m for m in cloud_models if m["name"] == model_name), {}
+            )
+            tier_str = cloud_entry.get("tier", "powerful")
+            return {
+                "name": model_name,
+                "provider": cloud_entry.get("provider", cloud_client.provider_name),
+                "available": True,
+                "tier": tier_str,
+                "specialties": [],
+                "max_context": 128000,
+                "quality_score": 0.9 if tier_str == "powerful" else 0.75,
+                "size": "cloud",
+                "modified": None,
+            }
+
+        # Local (Ollama) model path
         registry_info = MODEL_REGISTRY.get(model_name, {})
         availability = await self._is_available(model_name)
-        
-        # Get runtime info from Ollama
+
+        # get_model_info returns None when the model isn't pulled locally
         ollama_info = await self.ollama.get_model_info(model_name)
-        
+
+        if not availability and ollama_info is None and not registry_info:
+            return None
+
         return {
             "name": model_name,
+            "provider": "ollama",
             "available": availability,
             "tier": registry_info.get("tier", ModelTier.FAST).value,
             "specialties": [
@@ -472,44 +516,81 @@ class ModelService:
         tier: Optional[ModelTier] = None,
     ) -> List[Dict[str, Any]]:
         """
-        List available models, optionally filtered by task/tier.
-        
+        List available models (local + cloud), optionally filtered by task/tier.
+
+        Each entry includes a ``provider`` key: ``"ollama"`` for local models,
+        or the cloud provider name (``"openai"``, ``"anthropic"``, etc.).
+
         Args:
             task_type: Filter by task compatibility
             tier: Filter by capability tier
-            
+
         Returns:
-            List of model information dictionaries
+            Flat list of model information dictionaries
         """
-        all_models = await self.ollama.list_models()
-        
-        result = []
-        for model_info in all_models:
-            # Check registry for capabilities
+        ollama_models = await self.ollama.list_models()
+
+        result: List[Dict[str, Any]] = []
+
+        # --- Local (Ollama) models ---
+        for model_info in ollama_models:
             registry = MODEL_REGISTRY.get(model_info.name, {})
-            
-            # Apply filters
+
             if task_type:
-                specialties = registry.get("specialties", [])
-                if task_type not in specialties:
+                if task_type not in registry.get("specialties", []):
                     continue
-            
             if tier:
-                model_tier = registry.get("tier")
-                if model_tier != tier:
+                if registry.get("tier") != tier:
                     continue
-            
+
             result.append({
                 "name": model_info.name,
+                "provider": "ollama",
                 "size": model_info.size_formatted,
                 "tier": (registry.get("tier") or ModelTier.FAST).value,
-                "specialties": [
-                    s.value for s in registry.get("specialties", [])
-                ],
+                "specialties": [s.value for s in registry.get("specialties", [])],
                 "quality_score": registry.get("quality_weight", 0.5),
             })
-        
+
+        # --- Cloud models (only when no task/tier filter, or when the filter
+        #     can be reasonably applied to cloud tiers) ---
+        if self.cloud_registry.has_cloud_models():
+            for cloud_model in self.cloud_registry.get_all_models():
+                model_tier_str = cloud_model.get("tier", "powerful")
+                try:
+                    model_tier = ModelTier(model_tier_str)
+                except ValueError:
+                    model_tier = ModelTier.POWERFUL
+
+                if tier and model_tier != tier:
+                    continue
+                # Cloud models aren't in TASK_MODEL_MAP; skip task filter
+                # so they always appear when no task filter is applied.
+                if task_type:
+                    continue
+
+                result.append({
+                    "name": cloud_model["name"],
+                    "provider": cloud_model.get("provider", "cloud"),
+                    "size": "cloud",
+                    "tier": model_tier.value,
+                    "specialties": [],
+                    "quality_score": 0.9 if model_tier == ModelTier.POWERFUL else 0.75,
+                })
+
         return result
+
+    async def list_all_models_grouped(self) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Return models grouped into ``local`` and ``cloud`` lists.
+
+        Used by the /api/v1/models/ endpoint to provide the structured
+        response expected by the validation spec.
+        """
+        all_models = await self.list_available_models()
+        local = [m for m in all_models if m.get("provider") == "ollama"]
+        cloud = [m for m in all_models if m.get("provider") != "ollama"]
+        return {"local": local, "cloud": cloud}
     
     async def health_check(self) -> Dict[str, Any]:
         """
@@ -552,26 +633,39 @@ class ModelService:
     ) -> bool:
         """
         Check if a model is available, with caching.
-        
+
+        Cloud models are considered available as long as the provider API key
+        is configured — no network call is needed to verify this.
+
         Args:
             model_name: Model to check
             force_check: Bypass cache
-            
+
         Returns:
             True if model is available
         """
-        # Check cache
+        # Cloud models: available if provider is configured (API key is set)
+        if self.cloud_registry.get_client_for_model(model_name) is not None:
+            cache_key = f"cloud:{model_name}"
+            if not force_check and cache_key in self._availability_cache:
+                available, timestamp = self._availability_cache[cache_key]
+                if datetime.utcnow() - timestamp < self._availability_ttl:
+                    return available
+            self._availability_cache[cache_key] = (True, datetime.utcnow())
+            return True
+
+        # Check cache for local models
         if not force_check and model_name in self._availability_cache:
             available, timestamp = self._availability_cache[model_name]
             if datetime.utcnow() - timestamp < self._availability_ttl:
                 return available
-        
+
         # Check with Ollama
         is_available = await self.ollama.is_model_available(model_name)
-        
+
         # Update cache
         self._availability_cache[model_name] = (is_available, datetime.utcnow())
-        
+
         return is_available
     
     def _get_all_registered_models(self) -> List[str]:

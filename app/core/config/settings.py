@@ -660,6 +660,42 @@ class AgentSettings(BaseSettings):
     )
 
 
+class CloudSettings(BaseSettings):
+    """
+    Cloud model provider settings.
+
+    All fields are optional. Anvil auto-discovers which providers are
+    available by checking whether the corresponding API key is set.
+    No config file changes are needed — just export the key.
+
+    Supported providers:
+      OPENAI_API_KEY      → OpenAI (gpt-4o, o1, …)
+      ANTHROPIC_API_KEY   → Anthropic (claude-3.5-sonnet, …)
+      GOOGLE_API_KEY      → Google Gemini (gemini-2.0-flash, …)
+      OPENROUTER_API_KEY  → OpenRouter (200+ models, single key)
+      GROQ_API_KEY        → Groq (llama3, mixtral — very fast inference)
+      TOGETHER_API_KEY    → Together AI (open-source models)
+    """
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
+    openai_api_key: Optional[SecretStr] = Field(default=None)
+    anthropic_api_key: Optional[SecretStr] = Field(default=None)
+    google_api_key: Optional[SecretStr] = Field(default=None)
+    openrouter_api_key: Optional[SecretStr] = Field(default=None)
+    groq_api_key: Optional[SecretStr] = Field(default=None)
+    together_api_key: Optional[SecretStr] = Field(default=None)
+    cloud_models_enabled: bool = Field(
+        default=True,
+        description="Master switch — set to false to disable all cloud providers",
+    )
+
+
 # ============================================================================
 # Main Settings Class
 # ============================================================================
@@ -773,6 +809,7 @@ class Settings(BaseSettings):
     security: SecuritySettings = Field(default_factory=SecuritySettings)
     monitoring: MonitoringSettings = Field(default_factory=MonitoringSettings)
     agent: AgentSettings = Field(default_factory=AgentSettings)
+    cloud: CloudSettings = Field(default_factory=CloudSettings)
     
     # ========================================
     # Feature Flags
