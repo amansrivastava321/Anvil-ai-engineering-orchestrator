@@ -13,7 +13,57 @@ logger = structlog.get_logger(__name__)
 
 _BASE_URL = "https://openrouter.ai/api/v1"
 
-_MODELS = [
+# Free-tier models — no credits needed, just OPENROUTER_API_KEY
+FREE_OPENROUTER_MODELS = [
+    {
+        "name": "deepseek/deepseek-v4-flash:free",
+        "provider": "openrouter",
+        "tier": "powerful",
+        "specialties": ["code_generation", "debugging", "architecture_analysis", "code_review"],
+        "context_window": 1_000_000,
+        "cost": "free",
+        "priority": 1,
+    },
+    {
+        "name": "openai/gpt-oss-120b:free",
+        "provider": "openrouter",
+        "tier": "powerful",
+        "specialties": ["reasoning", "analysis", "security_audit", "pattern_discovery"],
+        "context_window": 128_000,
+        "cost": "free",
+        "priority": 2,
+    },
+    {
+        "name": "google/gemma-3-27b-it:free",
+        "provider": "openrouter",
+        "tier": "balanced",
+        "specialties": ["council_vote", "performance_analysis", "general_qa"],
+        "context_window": 32_000,
+        "cost": "free",
+        "priority": 3,
+    },
+    {
+        "name": "nousresearch/hermes-3-llama-3.1-405b:free",
+        "provider": "openrouter",
+        "tier": "powerful",
+        "specialties": ["synthesis", "council_proposal", "ceo_reasoning", "complex_reasoning"],
+        "context_window": 128_000,
+        "cost": "free",
+        "priority": 4,
+    },
+    {
+        "name": "mistralai/mistral-small-3.2-24b-instruct:free",
+        "provider": "openrouter",
+        "tier": "balanced",
+        "specialties": ["mode_selection", "council_critique", "quick_tasks"],
+        "context_window": 32_000,
+        "cost": "free",
+        "priority": 5,
+    },
+]
+
+# All models exposed to CloudRegistry (free first, then paid)
+_MODELS = FREE_OPENROUTER_MODELS + [
     {"name": "openai/gpt-4o", "provider": "openrouter", "tier": "powerful"},
     {"name": "anthropic/claude-3.5-sonnet", "provider": "openrouter", "tier": "powerful"},
     {"name": "google/gemini-2.0-flash", "provider": "openrouter", "tier": "balanced"},

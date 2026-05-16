@@ -580,6 +580,44 @@ class ModelService:
 
         return result
 
+    async def select_model_with_fallback(self, task_type: str) -> str:
+        """Return the first available model for *task_type* from the cloud-first chain.
+
+        Tries free OpenRouter models before local ones.  Falls back to the
+        local default if nothing in the chain is reachable.
+
+        Args:
+            task_type: Key into FREE_MODEL_ROUTING (e.g. "code_generation").
+
+        Returns:
+            Model name string (always non-empty).
+        """
+        import os
+        from app.ai.model_routing import FREE_MODEL_ROUTING, MODEL_ROUTING
+
+        chain = FREE_MODEL_ROUTING.get(task_type, FREE_MODEL_ROUTING["default"])
+        has_openrouter = bool(os.environ.get("OPENROUTER_API_KEY"))
+
+        for model in chain:
+            is_cloud = "/" in model
+            if is_cloud:
+                if has_openrouter and self.cloud_registry.get_client_for_model(model) is not None:
+                    logger.debug("Selected cloud model for task", task=task_type, model=model)
+                    return model
+            else:
+                if await self._is_available(model):
+                    logger.debug("Selected local model for task", task=task_type, model=model)
+                    return model
+
+        # Guaranteed fallback
+        fallback = MODEL_ROUTING.get(task_type, MODEL_ROUTING["default"])
+        logger.warning(
+            "select_model_with_fallback exhausted chain, using hard fallback",
+            task=task_type,
+            fallback=fallback,
+        )
+        return fallback
+
     async def list_all_models_grouped(self) -> Dict[str, List[Dict[str, Any]]]:
         """
         Return models grouped into ``local`` and ``cloud`` lists.

@@ -242,6 +242,12 @@ class CEO:
         If the description is empty or one of the onboarding trigger words, runs
         the onboarding pipeline instead of a standard council deliberation.
         """
+        import os
+
+        model_tier = "cloud" if os.environ.get("OPENROUTER_API_KEY") else "local"
+        problem.context["model_tier"] = model_tier
+        logger.info("CEO handling problem", tier=model_tier)
+
         _ONBOARD_TRIGGERS = {"", "analyze", "audit", "explore", "onboard", "scan"}
         desc = (problem.description or "").strip().lower()
 
@@ -622,8 +628,9 @@ _ceo: Optional[CEO] = None
 def get_ceo(llm: Optional[LLMCallable] = None) -> CEO:
     """Get or create the singleton CEO instance.
 
-    In production (llm=None), each component gets its optimal model via
-    MODEL_ROUTING. In tests, the provided mock_llm is used for everything.
+    In production (llm=None), each component gets a cloud-first routing LLM via
+    make_routing_llm — free OpenRouter models are tried first, local Ollama is
+    the guaranteed fallback.  In tests, the provided mock_llm is used for everything.
     """
     global _ceo
     if _ceo is None:
@@ -631,11 +638,11 @@ def get_ceo(llm: Optional[LLMCallable] = None) -> CEO:
             # Test / custom mode — single LLM for everything
             _ceo = CEO(llm=llm)
         else:
-            from app.ai.model_routing import make_ollama_llm, MODEL_ROUTING
+            from app.ai.model_routing import make_routing_llm
             _ceo = CEO(
-                llm=make_ollama_llm(MODEL_ROUTING["ceo_reasoning"]),
-                selector_llm=make_ollama_llm(MODEL_ROUTING["mode_selection"]),
-                synthesis_llm=make_ollama_llm(MODEL_ROUTING["synthesis"]),
-                pattern_llm=make_ollama_llm(MODEL_ROUTING["pattern_discovery"]),
+                llm=make_routing_llm("ceo_reasoning"),
+                selector_llm=make_routing_llm("mode_selection"),
+                synthesis_llm=make_routing_llm("synthesis"),
+                pattern_llm=make_routing_llm("pattern_discovery"),
             )
     return _ceo

@@ -17,7 +17,25 @@ logger = get_logger(__name__)
 
 LLMCallable = Callable[[str, str], Coroutine[Any, Any, str]]
 
-# ── Routing table ─────────────────────────────────────────────────────────────
+# ── Routing tables ────────────────────────────────────────────────────────────
+
+# Cloud-first chains: each list is tried in order.
+# Cloud models (contain "/") are skipped if OPENROUTER_API_KEY is not set.
+# The last entry is always a local Ollama model (guaranteed fallback).
+FREE_MODEL_ROUTING: dict[str, list[str]] = {
+    "mode_selection":        ["mistralai/mistral-small-3.2-24b-instruct:free", "phi4-mini:latest"],
+    "council_proposal":      ["nousresearch/hermes-3-llama-3.1-405b:free",    "dolphin-mistral:7b"],
+    "council_critique":      ["mistralai/mistral-small-3.2-24b-instruct:free", "dolphin-mistral:7b"],
+    "council_vote":          ["google/gemma-3-27b-it:free",                   "dolphin-mistral:7b"],
+    "synthesis":             ["nousresearch/hermes-3-llama-3.1-405b:free",    "deepseek-r1:7b"],
+    "code_generation":       ["deepseek/deepseek-v4-flash:free",              "dolphincoder:7b"],
+    "pattern_discovery":     ["openai/gpt-oss-120b:free",                     "qwen3.5:9b"],
+    "architecture_analysis": ["deepseek/deepseek-v4-flash:free",              "gemma4:e4b"],
+    "security_audit":        ["openai/gpt-oss-120b:free",                     "dolphin-mistral:7b"],
+    "performance_analysis":  ["google/gemma-3-27b-it:free",                   "dolphin-mistral:7b"],
+    "ceo_reasoning":         ["nousresearch/hermes-3-llama-3.1-405b:free",    "dolphin-mistral:7b"],
+    "default":               ["deepseek/deepseek-v4-flash:free",              "dolphin-mistral:7b"],
+}
 
 MODEL_ROUTING: dict[str, str] = {
     "mode_selection":        "phi4-mini:latest",      # fast classification
@@ -111,6 +129,80 @@ def make_ollama_llm(model: str) -> LLMCallable:
             raw = strip_thinking_tokens(raw)
 
         return raw
+
+    return _llm
+
+
+def make_openrouter_llm(model: str) -> LLMCallable:
+    """Return an LLMCallable that routes a single call to OpenRouter."""
+
+    async def _llm(system: str, prompt: str) -> str:
+        from app.services.cloud_registry import get_cloud_registry
+
+        client = get_cloud_registry().get_client_for_model(model)
+        if client is None:
+            raise RuntimeError(
+                f"No cloud client for '{model}' — set OPENROUTER_API_KEY"
+            )
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ]
+        result = await client.chat(
+            model=model, messages=messages, temperature=0.1, max_tokens=4096
+        )
+        return result if isinstance(result, str) else str(result)
+
+    return _llm
+
+
+def make_routing_llm(task: str) -> LLMCallable:
+    """Return an LLMCallable that tries free cloud models first, then falls back to local.
+
+    Chain order comes from FREE_MODEL_ROUTING[task].
+    Cloud entries (containing "/") are skipped when OPENROUTER_API_KEY is absent.
+    The local fallback at the tail of each chain is always tried.
+    If every entry fails, the hard local fallback from MODEL_ROUTING is used.
+    """
+    chain = FREE_MODEL_ROUTING.get(task, FREE_MODEL_ROUTING["default"])
+
+    async def _llm(system: str, prompt: str) -> str:
+        import os
+
+        has_openrouter = bool(os.environ.get("OPENROUTER_API_KEY"))
+
+        for model in chain:
+            is_cloud = "/" in model
+            if is_cloud and not has_openrouter:
+                continue
+            try:
+                if is_cloud:
+                    result = await make_openrouter_llm(model)(system, prompt)
+                else:
+                    result = await make_ollama_llm(model)(system, prompt)
+                logger.info(
+                    "Routing LLM succeeded",
+                    task=task,
+                    model=model,
+                    tier="cloud" if is_cloud else "local",
+                )
+                return result
+            except Exception as exc:
+                logger.warning(
+                    "Model failed, trying next in chain",
+                    task=task,
+                    model=model,
+                    error=str(exc),
+                )
+
+        # Hard fallback — guaranteed local model
+        fallback = MODEL_ROUTING.get(task, MODEL_ROUTING["default"])
+        logger.warning(
+            "All chain models failed, using hard local fallback",
+            task=task,
+            fallback=fallback,
+        )
+        return await make_ollama_llm(fallback)(system, prompt)
 
     return _llm
 

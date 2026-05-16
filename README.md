@@ -287,6 +287,41 @@ from every provider — no separate accounts needed.
 
 ---
 
+## Free Cloud Models (Automatic)
+
+When `OPENROUTER_API_KEY` is set, Anvil automatically promotes five completely
+free OpenRouter models to the front of its routing chains. No credits, no billing.
+
+| Model | Params | Primary Role |
+|-------|--------|--------------|
+| `deepseek/deepseek-v4-flash:free` | 284B | Code generation, debugging, architecture |
+| `openai/gpt-oss-120b:free` | 120B | Reasoning, security audit, pattern discovery |
+| `nousresearch/hermes-3-llama-3.1-405b:free` | 405B | CEO reasoning, synthesis, council proposals |
+| `google/gemma-3-27b-it:free` | 27B | Council voting, performance analysis |
+| `mistralai/mistral-small-3.2-24b-instruct:free` | 24B | Mode selection, council critique |
+
+### How It Works
+
+1. **Try free cloud first** — each AI component calls its assigned free OpenRouter model
+2. **Automatic fallback** — if a cloud call fails, the next model in the chain is tried
+3. **Local always works** — the local Ollama model is the guaranteed last resort in every chain
+
+### Setup
+
+```bash
+export OPENROUTER_API_KEY=sk-or-...   # free account at openrouter.ai
+uvicorn app.main:app --port 8008
+```
+
+That's it. Anvil routes internally — no other changes needed.
+
+### Offline Mode
+
+No key set? Anvil works identically with local Ollama models. Remove the env var
+at any time to return to fully local inference with no errors or restarts required.
+
+---
+
 ## Adding New Models
 
 Anvil auto-discovers any model available in Ollama. No config changes needed.
